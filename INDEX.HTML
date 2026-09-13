@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MERSA – Smart Study Anchor</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #fff;
+  }
+  .container {
+    width: 100%;
+    max-width: 960px;
+    height: 92vh;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  }
+  header {
+    padding: 18px 25px;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: bold; }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #00c9ff, #92fe9d);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .slogan { font-size: 0.8rem; color: #92fe9d; margin-top: 2px; }
+  .settings { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #00c9ff, #92fe9d);
+    color: #0f2027;
+    border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
+    transition: transform 0.2s;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.danger { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: #fff; }
+  .btn.lang { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+  .btn.lang:hover { background: rgba(255,255,255,0.22); }
+
+  #chat {
+    flex: 1; overflow-y: auto; padding: 25px;
+    display: flex; flex-direction: column; gap: 15px;
+  }
+  #chat::-webkit-scrollbar { width: 8px; }
+  #chat::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+  .msg {
+    max-width: 88%; padding: 14px 18px; border-radius: 16px;
+    line-height: 1.8; word-wrap: break-word; animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.user {
+    align-self: flex-start;
+    background: linear-gradient(135deg, #00c9ff, #0072ff);
+    color: #fff; border-bottom-right-radius: 4px;
+  }
+  .msg.bot {
+    align-self: flex-end;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-bottom-left-radius: 4px;
+  }
+  .msg.bot pre {
+    background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;
+    overflow-x: auto; margin: 8px 0; direction: ltr; text-align: left;
+  }
+  .msg.bot code { font-family: 'Courier New', monospace; font-size: 0.9rem; }
+  .msg.bot p { margin: 8px 0; }
+  .msg.bot ul, .msg.bot ol { margin: 8px 20px; }
+  .msg.bot strong { color: #92fe9d; }
+
+  .next-step {
+    align-self: flex-end;
+    max-width: 88%;
+    margin-top: -6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(146,254,157,0.08);
+    border: 1px dashed rgba(146,254,157,0.5);
+    padding: 10px 14px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: all 0.2s;
+    text-align: start;
+  }
+  .next-step:hover { background: rgba(146,254,157,0.18); transform: translateY(-1px); }
+  .next-step .arrow { color: #92fe9d; font-size: 1.1rem; }
+
+  .quick-actions {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; justify-content: center;
+  }
+  .action-chip {
+    background: rgba(146, 254, 157, 0.15); border: 1px solid #92fe9d; color: #92fe9d;
+    padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-chip:hover { background: #92fe9d; color: #0f2027; }
+
+  .typing {
+    align-self: flex-end; padding: 12px 18px;
+    background: rgba(255,255,255,0.1); border-radius: 16px; display: flex; gap: 4px;
+  }
+  .typing span {
+    width: 8px; height: 8px; background: #92fe9d; border-radius: 50%;
+    animation: bounce 1.4s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-8px); opacity: 1; } }
+
+  .input-area {
+    padding: 18px; background: rgba(0,0,0,0.3);
+    border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px;
+  }
+  #userInput {
+    flex: 1; padding: 12px 16px; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;
+    color: #fff; font-size: 1rem; outline: none; resize: none;
+    min-height: 45px; max-height: 120px;
+  }
+  #userInput:focus { border-color: #92fe9d; }
+  #sendBtn {
+    padding: 0 22px; background: linear-gradient(135deg, #00c9ff, #92fe9d);
+    color: #0f2027; border: none; border-radius: 12px; cursor: pointer;
+    font-weight: bold; font-size: 1rem; transition: transform 0.2s;
+    white-space: nowrap;
+  }
+  #sendBtn:hover:not(:disabled) { transform: scale(1.05); }
+  #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .welcome { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.9); }
+  .welcome h2 { color: #92fe9d; margin-bottom: 10px; font-size: 1.8rem; }
+  .welcome p { font-size: 0.95rem; line-height: 1.8; margin-bottom: 20px; }
+  .error { background: rgba(255,107,107,0.2); border: 1px solid #ff6b6b; color: #ffb3b3; }
+
+  /* ===================================================================
+     Route diagram — the study plan rendered as a sailing route:
+     each day is a stop ("buoy") along a line, exam day is the flag.
+     =================================================================== */
+  .plan-diagram {
+    align-self: stretch;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(146,254,157,0.3);
+    border-radius: 18px;
+    padding: 18px 18px 10px;
+    animation: fadeIn 0.35s ease;
+  }
+  .pd-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 6px; flex-wrap: wrap; gap: 8px;
+    padding-bottom: 12px;
+  }
+  .pd-title { font-size: 1.1rem; font-weight: bold; color: #92fe9d; }
+  .pd-countdown {
+    background: linear-gradient(135deg, #00c9ff, #92fe9d);
+    color: #0f2027; font-weight: bold; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .pd-scroll {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    padding: 10px 6px 14px;
+    gap: 4px;
+  }
+  .pd-scroll::-webkit-scrollbar { height: 8px; }
+  .pd-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+  .pd-line {
+    position: absolute;
+    top: 170px;
+    left: 20px; right: 20px;
+    height: 2px;
+    background-image: linear-gradient(to right, #92fe9d 60%, rgba(255,255,255,0) 0%);
+    background-size: 14px 2px;
+    background-repeat: repeat-x;
+    opacity: 0.6;
+    z-index: 0;
+  }
+  .pd-node {
+    position: relative;
+    width: 172px;
+    flex-shrink: 0;
+    display: grid;
+    grid-template-rows: 150px 40px 150px;
+    justify-items: center;
+    z-index: 1;
+  }
+  .pd-marker { grid-row: 2; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .pd-dot {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #00c9ff, #92fe9d);
+    color: #0f2027; font-weight: bold; font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 5px rgba(146,254,157,0.12);
+  }
+  .pd-node.today .pd-dot {
+    box-shadow: 0 0 0 5px rgba(146,254,157,0.35);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 5px rgba(146,254,157,0.35); }
+    50% { box-shadow: 0 0 0 9px rgba(146,254,157,0.15); }
+  }
+  .pd-date { font-size: 0.72rem; color: rgba(255,255,255,0.55); white-space: nowrap; }
+  .pd-card {
+    width: 158px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  .pd-node.up .pd-card { grid-row: 1; align-self: end; }
+  .pd-node.down .pd-card { grid-row: 3; align-self: start; }
+  .pd-focus { font-size: 0.76rem; font-weight: bold; color: #92fe9d; margin-bottom: 6px; line-height: 1.4; }
+  .pd-tasks { display: flex; flex-direction: column; gap: 6px; }
+  .pd-task { display: flex; align-items: flex-start; gap: 6px; font-size: 0.74rem; line-height: 1.4; }
+  .pd-task .pd-icon { flex-shrink: 0; }
+  .pd-task .pd-subject { font-weight: bold; }
+  .pd-task .pd-topic { color: rgba(255,255,255,0.6); display: block; }
+  .pd-task .pd-duration { color: #00c9ff; font-size: 0.68rem; }
+
+  .pd-exam { width: 130px; }
+  .pd-exam .pd-marker { }
+  .pd-flag {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, #ffcf5c, #ff8a5c);
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    box-shadow: 0 0 0 5px rgba(255,138,92,0.15);
+  }
+  .pd-exam .pd-date { font-weight: bold; color: #ffcf5c; }
+
+  /* ===================== Quiz widget ===================== */
+  .quiz-widget {
+    align-self: stretch;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(0,201,255,0.3);
+    border-radius: 18px;
+    padding: 20px;
+    animation: fadeIn 0.35s ease;
+  }
+  .quiz-widget .qw-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .quiz-widget .qw-title { font-weight: bold; color: #00c9ff; font-size: 1.05rem; }
+  .qw-progress-track {
+    height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 18px;
+  }
+  .qw-progress-fill {
+    height: 100%; background: linear-gradient(90deg, #00c9ff, #92fe9d); transition: width 0.3s ease;
+  }
+  .qw-question { font-size: 1rem; margin-bottom: 16px; line-height: 1.7; }
+  .qw-options { display: flex; flex-direction: column; gap: 10px; }
+  .qw-option {
+    text-align: start; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; padding: 12px 16px; border-radius: 12px; cursor: pointer; font-size: 0.92rem;
+    transition: all 0.2s;
+  }
+  .qw-option:hover:not(:disabled) { border-color: #00c9ff; background: rgba(0,201,255,0.1); }
+  .qw-option:disabled { cursor: default; }
+  .qw-option.correct { background: rgba(146,254,157,0.2); border-color: #92fe9d; }
+  .qw-option.wrong { background: rgba(255,107,107,0.2); border-color: #ff6b6b; }
+  .qw-explain {
+    margin-top: 14px; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 16px;
+    font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 1.7; text-align: start;
+  }
+  .qw-next-btn {
+    margin-top: 16px; width: 100%; padding: 12px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #00c9ff, #92fe9d); color: #0f2027; font-weight: bold;
+    cursor: pointer; font-size: 0.95rem; transition: transform 0.2s;
+  }
+  .qw-next-btn:hover { transform: translateY(-2px); }
+  .qw-result { text-align: center; }
+  .qw-result .qw-score { font-size: 2.2rem; font-weight: bold; color: #92fe9d; margin-bottom: 6px; }
+  .qw-result p { font-size: 0.9rem; color: rgba(255,255,255,0.75); margin-bottom: 16px; }
+
+  @media (max-width: 640px) {
+    .pd-node { width: 140px; grid-template-rows: 170px 40px 170px; }
+    .pd-card { width: 128px; }
+    .pd-line { top: 190px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⚓</div>
+      <div>
+        <div>MERSA</div>
+        <div class="slogan" id="sloganText">Don't study more… study smart</div>
+      </div>
+    </div>
+    <div class="settings">
+      <button class="btn lang" id="langBtn">العربية</button>
+      <button class="btn danger" id="clearBtn">🗑️ Clear</button>
+    </div>
+  </header>
+
+  <div id="chat"></div>
+
+  <div class="input-area">
+    <textarea id="userInput" placeholder="Type your question or pick an action above..." rows="1"></textarea>
+    <button id="sendBtn">Send ➤</button>
+  </div>
+</div>
+
+<script>
+/* ==================== Translations ==================== */
+const TXT = {
+  en: {
+    slogan: "Don't study more… study smart",
+    clear: '🗑️ Clear',
+    langBtnLabel: 'العربية',
+    welcomeTitle: 'Welcome to MERSA ⚓',
+    welcomeBody: 'Your smart companion that turns studying from a burden into a clear, guaranteed plan.<br>Start your journey by picking one of the actions below, or type your question directly 👇',
+    actions: [
+      { label: '📄 Upload a summary/file', msg: 'I have a summary or file — how do we get started?' },
+      { label: '📅 Set my exam date', msg: 'I want to set my exam date and build a study plan.' },
+      { label: '📝 Quick diagnostic test', msg: 'I want a quick diagnostic test.' },
+      { label: '📊 Analyze my weak points', msg: 'Analyze my weak points and suggest a review plan.' }
+    ],
+    placeholder: 'Type your question or pick an action above...',
+    send: 'Send ➤',
+    devWarning: '⚠️ **Developer note:** please open the code and replace `API_KEY` with your actual OpenRouter key.',
+    errorPrefix: '❌ **Error:** ',
+    networkError: (m) => `❌ **Network error:** please check your internet connection. (${m})`,
+    confirmClear: 'Do you want to clear the whole conversation and current plan?',
+    nextStepPrefix: "Sure, let's continue with: ",
+    planTitleDefault: 'Study Plan',
+    examToday: 'Exam is today! 🔥',
+    examPassed: 'The date has passed ✅',
+    daysLeft: (n) => `⏳ ${n} day${n === 1 ? '' : 's'} left`,
+    examFlagLabel: 'Exam',
+    quizTopicDefault: 'Quick Diagnostic Test',
+    correctFeedback: '✅ **Correct!** ',
+    wrongFeedback: "❌ **Not quite.** ",
+    nextQuestion: 'Next question →',
+    showResult: 'Show result 📊',
+    resultGood: 'Excellent — your level in this subject is strong! 🎉',
+    resultOk: "Good, now we know exactly what to focus on 💪",
+    analyzeBtn: 'Analyze my result & build a plan 📅',
+    quizSummary: (score, total, wrongQs) => {
+      let s = `My diagnostic test result: ${score}/${total}.\n`;
+      s += wrongQs.length
+        ? `Questions I got wrong:\n- ${wrongQs.join('\n- ')}\n`
+        : `I answered every question correctly.\n`;
+      s += `Analyze my weak points and suggest a suitable study plan for the remaining time.`;
+      return s;
+    },
+    langDirective: 'ENGLISH'
+  },
+  ar: {
+    slogan: 'لا تذاكر أكثر… ذاكر بذكاء',
+    clear: '🗑️ مسح',
+    langBtnLabel: 'English',
+    welcomeTitle: 'مرحباً بك في مِرساة ⚓',
+    welcomeBody: 'مساعدك الذكي لتحويل المذاكرة من عبء إلى خطة واضحة ومضمونة.<br>ابدأ رحلتك باختيار أحد الإجراءات التالية أو اكتب سؤالك مباشرة 👇',
+    actions: [
+      { label: '📄 رفع ملخص/ملف', msg: 'لدي ملخص أو ملف، كيف نبدأ؟' },
+      { label: '📅 تحديد موعد الاختبار', msg: 'أريد تحديد موعد الاختبار ووضع خطة مذاكرة.' },
+      { label: '📝 اختبار تشخيصي', msg: 'أريد اختباراً تشخيصياً سريعاً.' },
+      { label: '📊 تحليل نقاط الضعف', msg: 'حلل نقاط ضعفي واقترح خطة مراجعة.' }
+    ],
+    placeholder: 'اكتب سؤالك أو اختر من الإجراءات أعلاه...',
+    send: 'إرسال ➤',
+    devWarning: '⚠️ **تنبيه للمطور:** يرجى فتح الكود واستبدال `API_KEY` بمفتاحك الفعلي من OpenRouter.',
+    errorPrefix: '❌ **خطأ:** ',
+    networkError: (m) => `❌ **خطأ في الشبكة:** تأكد من اتصالك بالإنترنت. (${m})`,
+    confirmClear: 'هل تريد مسح المحادثة والخطة الحالية بالكامل؟',
+    nextStepPrefix: 'تمام، يلا نكمل: ',
+    planTitleDefault: 'خطة المذاكرة',
+    examToday: '🔥 الاختبار النهارده!',
+    examPassed: '✅ الموعد فات',
+    daysLeft: (n) => `⏳ باقي ${n} يوم`,
+    examFlagLabel: 'الاختبار',
+    quizTopicDefault: 'اختبار تشخيصي سريع',
+    correctFeedback: '✅ **إجابة صحيحة!** ',
+    wrongFeedback: '❌ **مش الإجابة الصح.** ',
+    nextQuestion: 'السؤال التالي ←',
+    showResult: 'عرض النتيجة 📊',
+    resultGood: 'ممتاز! مستواك قوي في المادة دي 🎉',
+    resultOk: 'تمام، كده عرفنا نقاط الضعف بالظبط، وهنركز عليها في الخطة 💪',
+    analyzeBtn: 'حلل نتيجتي واقترح خطة مذاكرة 📅',
+    quizSummary: (score, total, wrongQs) => {
+      let s = `نتيجتي في الاختبار التشخيصي: ${score} من ${total}.\n`;
+      s += wrongQs.length
+        ? `الأسئلة اللي غلطت فيها:\n- ${wrongQs.join('\n- ')}\n`
+        : `أجبت صح على كل الأسئلة.\n`;
+      s += `حلل نقاط ضعفي واقترح خطة مذاكرة مناسبة للوقت المتبقي.`;
+      return s;
+    },
+    langDirective: 'ARABIC'
+  }
+};
+
+let currentLang = localStorage.getItem('mersa_lang') || 'en';
+
+const chat = document.getElementById('chat');
+const input = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+const langBtn = document.getElementById('langBtn');
+const sloganText = document.getElementById('sloganText');
+
+// ⚙️ OpenRouter settings (replace with your real key)
+const API_KEY = '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';
+const MODEL = 'meta-llama/llama-3.1-8b-instruct';
+
+let history = [];
+
+function t() { return TXT[currentLang]; }
+
+function applyLanguage(lang, opts = {}) {
+  currentLang = lang;
+  localStorage.setItem('mersa_lang', lang);
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  sloganText.textContent = t().slogan;
+  clearBtn.textContent = t().clear;
+  langBtn.textContent = t().langBtnLabel;
+  input.placeholder = t().placeholder;
+  sendBtn.textContent = t().send;
+  if (!opts.skipWelcomeRerender && chat.querySelector('.welcome')) renderWelcome();
+}
+
+function renderWelcome() {
+  chat.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'welcome';
+  div.innerHTML = `
+    <h2>${t().welcomeTitle}</h2>
+    <p>${t().welcomeBody}</p>
+    <div class="quick-actions"></div>
+  `;
+  const actionsWrap = div.querySelector('.quick-actions');
+  t().actions.forEach(a => {
+    const chip = document.createElement('div');
+    chip.className = 'action-chip';
+    chip.textContent = a.label;
+    chip.onclick = () => setInput(a.msg);
+    actionsWrap.appendChild(chip);
+  });
+  chat.appendChild(div);
+}
+
+langBtn.addEventListener('click', () => applyLanguage(currentLang === 'en' ? 'ar' : 'en'));
+
+/* ==================== Init / persistence ==================== */
+const savedHistory = localStorage.getItem('mersa_history_or');
+applyLanguage(currentLang, { skipWelcomeRerender: true });
+if (savedHistory) {
+  try {
+    history = JSON.parse(savedHistory);
+    history.forEach(m => {
+      if (m.role === 'user') renderMessage('user', m.content);
+      else renderBotMessage(m.content);
+    });
+  } catch (e) { history = []; }
+}
+if (!chat.children.length) renderWelcome();
+
+function setInput(text) {
+  input.value = text;
+  input.focus();
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+}
+
+clearBtn.addEventListener('click', () => {
+  if (confirm(t().confirmClear)) {
+    history = [];
+    localStorage.removeItem('mersa_history_or');
+    location.reload();
+  }
+});
+
+function formatText(text) {
+  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (m, lang, code) => `<pre><code>${escapeHtml(code.trim())}</code></pre>`);
+  text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  text = text.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>');
+  text = text.split(/\n\n+/).map(p => {
+    if (p.startsWith('<pre>') || p.startsWith('<ul>') || p.startsWith('<ol>')) return p;
+    return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+  }).join('');
+  return text;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderMessage(type, text) {
+  const welcome = chat.querySelector('.welcome');
+  if (welcome) welcome.remove();
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.innerHTML = type === 'bot' ? formatText(text) : escapeHtml(text).replace(/\n/g, '<br>');
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+/* ==================== Extract <plan> / <quiz> blocks ==================== */
+function extractSpecialBlocks(raw) {
+  let text = raw;
+  let plan = null, quiz = null;
+
+  const planMatch = text.match(/<plan>([\s\S]*?)<\/plan>/i);
+  if (planMatch) {
+    try { plan = JSON.parse(planMatch[1].trim()); } catch (e) { plan = null; }
+    text = text.replace(planMatch[0], '');
+  }
+  const quizMatch = text.match(/<quiz>([\s\S]*?)<\/quiz>/i);
+  if (quizMatch) {
+    try { quiz = JSON.parse(quizMatch[1].trim()); } catch (e) { quiz = null; }
+    text = text.replace(quizMatch[0], '');
+  }
+  return { text: text.trim(), plan, quiz };
+}
+
+function extractNextStep(text) {
+  const m = text.match(/(?:Next suggested step|المرحلة التالية المقترحة):?\**\s*[:\-]?\s*(.+)/i);
+  if (!m) return { text, nextStep: null };
+  const nextStep = m[1].replace(/\*+$/, '').trim();
+  const cleaned = text.replace(m[0], '').trim();
+  return { text: cleaned, nextStep };
+}
+
+function renderBotMessage(rawText) {
+  const { text: withoutBlocks, plan, quiz } = extractSpecialBlocks(rawText);
+  const { text: finalText, nextStep } = extractNextStep(withoutBlocks);
+
+  if (finalText) renderMessage('bot', finalText);
+  if (plan) renderPlanDiagram(plan);
+  if (quiz) renderQuizWidget(quiz);
+  if (nextStep) renderNextStepChip(nextStep);
+}
+
+function renderNextStepChip(nextStepText) {
+  const div = document.createElement('div');
+  div.className = 'next-step';
+  div.innerHTML = `<span class="arrow">➡️</span><span>${escapeHtml(nextStepText)}</span>`;
+  div.onclick = () => {
+    input.value = t().nextStepPrefix + nextStepText;
+    sendMessage();
+  };
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* ==================== Study plan → route diagram ==================== */
+const TASK_ICONS = { review: '📖', new: '✨', practice: '💪', test: '🧪' };
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  if (isNaN(target)) return null;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  return Math.round((target - now) / 86400000);
+}
+function isToday(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  const n = new Date();
+  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+}
+
+function renderPlanDiagram(plan) {
+  const wrap = document.createElement('div');
+  wrap.className = 'plan-diagram';
+
+  const remaining = daysUntil(plan.examDate);
+  let countdownText = '';
+  if (remaining !== null) {
+    countdownText = remaining > 0 ? t().daysLeft(remaining) : remaining === 0 ? t().examToday : t().examPassed;
+  }
+
+  const days = plan.days || [];
+  let nodesHtml = '';
+  days.forEach((day, i) => {
+    const dir = i % 2 === 0 ? 'up' : 'down';
+    const today = isToday(day.date);
+    const tasksHtml = (day.tasks || []).map(tsk => `
+      <div class="pd-task">
+        <span class="pd-icon">${TASK_ICONS[tsk.type] || '📌'}</span>
+        <span>
+          <span class="pd-subject">${escapeHtml(tsk.subject || '')}</span>
+          ${tsk.topic ? `<span class="pd-topic">${escapeHtml(tsk.topic)}</span>` : ''}
+          ${tsk.duration ? `<span class="pd-duration">${escapeHtml(tsk.duration)}</span>` : ''}
+        </span>
+      </div>
+    `).join('');
+
+    nodesHtml += `
+      <div class="pd-node ${dir} ${today ? 'today' : ''}">
+        <div class="pd-card">
+          ${day.focus ? `<div class="pd-focus">${escapeHtml(day.focus)}</div>` : ''}
+          <div class="pd-tasks">${tasksHtml}</div>
+        </div>
+        <div class="pd-marker">
+          <div class="pd-dot">${i + 1}</div>
+          <div class="pd-date">${escapeHtml(day.label || '')}${day.date ? ' · ' + escapeHtml(day.date) : ''}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  nodesHtml += `
+    <div class="pd-node pd-exam">
+      <div class="pd-marker" style="grid-row:2">
+        <div class="pd-flag">🏁</div>
+        <div class="pd-date">${t().examFlagLabel}${plan.examDate ? ' · ' + escapeHtml(plan.examDate) : ''}</div>
+      </div>
+    </div>
+  `;
+
+  wrap.innerHTML = `
+    <div class="pd-head">
+      <span class="pd-title">📅 ${escapeHtml(plan.title || t().planTitleDefault)}</span>
+      ${countdownText ? `<span class="pd-countdown">${countdownText}</span>` : ''}
+    </div>
+    <div class="pd-scroll">
+      <div class="pd-line"></div>
+      ${nodesHtml}
+    </div>
+  `;
+
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* ==================== Diagnostic quiz widget ==================== */
+function renderQuizWidget(quiz) {
+  const wrap = document.createElement('div');
+  wrap.className = 'quiz-widget';
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+
+  const questions = quiz.questions || [];
+  let current = 0;
+  const answers = [];
+
+  function renderQuestion() {
+    const q = questions[current];
+    const progress = Math.round((current / questions.length) * 100);
+    wrap.innerHTML = `
+      <div class="qw-head">
+        <span class="qw-title">📝 ${escapeHtml(quiz.topic || t().quizTopicDefault)}</span>
+        <span style="font-size:0.8rem;color:rgba(255,255,255,0.6)">${current + 1} / ${questions.length}</span>
+      </div>
+      <div class="qw-progress-track"><div class="qw-progress-fill" style="width:${progress}%"></div></div>
+      <div class="qw-question">${escapeHtml(q.question)}</div>
+      <div class="qw-options">
+        ${q.options.map((opt, i) => `<button class="qw-option" data-i="${i}">${escapeHtml(opt)}</button>`).join('')}
+      </div>
+    `;
+    wrap.querySelectorAll('.qw-option').forEach(btn => {
+      btn.addEventListener('click', () => selectAnswer(parseInt(btn.dataset.i)));
+    });
+  }
+
+  function selectAnswer(i) {
+    const q = questions[current];
+    const isCorrect = i === q.correctIndex;
+    answers.push({ correct: isCorrect, question: q.question });
+
+    wrap.querySelectorAll('.qw-option').forEach((btn, idx) => {
+      btn.disabled = true;
+      if (idx === q.correctIndex) btn.classList.add('correct');
+      else if (idx === i) btn.classList.add('wrong');
+    });
+
+    const explainDiv = document.createElement('div');
+    explainDiv.className = 'qw-explain';
+    explainDiv.innerHTML = (isCorrect ? t().correctFeedback : t().wrongFeedback) + escapeHtml(q.explanation || '');
+    wrap.appendChild(explainDiv);
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'qw-next-btn';
+    nextBtn.textContent = current < questions.length - 1 ? t().nextQuestion : t().showResult;
+    nextBtn.onclick = () => {
+      current++;
+      if (current < questions.length) renderQuestion();
+      else showResult();
+    };
+    wrap.appendChild(nextBtn);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function showResult() {
+    const score = answers.filter(a => a.correct).length;
+    const wrongTopics = answers.filter(a => !a.correct).map(a => a.question);
+    wrap.innerHTML = `
+      <div class="qw-result">
+        <div class="qw-score">${score} / ${questions.length}</div>
+        <p>${score === questions.length ? t().resultGood : t().resultOk}</p>
+        <button class="qw-next-btn" id="analyzeBtn">${t().analyzeBtn}</button>
+      </div>
+    `;
+    document.getElementById('analyzeBtn').onclick = () => {
+      input.value = t().quizSummary(score, questions.length, wrongTopics);
+      sendMessage();
+    };
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  renderQuestion();
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.id = 'typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+/* ==================== System prompt (language-agnostic, English) ==================== */
+const BASE_SYSTEM_PROMPT = `You are "MERSA", a smart study-planning assistant. Your motto: "Don't study more… study smart."
+
+# Personality and tone
+- You are warm, friendly, and encouraging — like a capable friend helping a classmate before an exam, not a dry customer-support bot.
+- Your replies are **detailed and genuinely useful**, not one-liners. When you explain something, explain it well with examples; when you propose a plan, explain the reasoning behind each part of it.
+- Use headings, short paragraphs, bold text, and lists so replies are easy to scan. Use emoji moderately (one or two per section, not per sentence).
+- Be empathetic about exam stress and studying pressure, and project genuine confidence that the student can get there.
+
+# Workflow stages
+1. 📥 **Understand the material**: help the student summarize or extract the key ideas from what they uploaded or described.
+2. 📅 **Set the date**: ask about the exam date and available time, then start thinking about how to spread the days.
+3. 📝 **Diagnose**: run a short test (3–6 questions) to measure the student's current level.
+4. 📊 **Analyze**: once the test result comes back, identify strengths and weaknesses clearly and specifically.
+5. 📅 **Plan**: build a realistic daily study plan that tackles weak points first and spaces out review across the remaining days.
+
+# Core rule: don't dump everything at once
+Guide the student step by step (material → test → analysis → plan). At the end of every reply, add a separate line in exactly this format so the interface can turn it into a clickable button:
+Next suggested step: [one clear sentence describing what comes next]
+
+# Interactive quiz protocol (important)
+When you reach the "diagnose" stage and want to run a test, do NOT write the questions as plain text. Instead include a JSON block wrapped in a <quiz> tag, exactly like this, so the interface renders it as clickable multiple-choice questions:
+
+<quiz>
+{
+  "topic": "topic name",
+  "questions": [
+    {
+      "question": "question text",
+      "options": ["option 1", "option 2", "option 3", "option 4"],
+      "correctIndex": 0,
+      "explanation": "brief explanation of why this is correct"
+    }
+  ]
+}
+</quiz>
+
+Write one or two warm sentences before the block introducing the test. Do not repeat the questions as plain text after the JSON — the interface renders them automatically.
+
+# Study plan protocol (important)
+When you reach the "plan" stage, do NOT write the plan as a table or plain list. Instead include a JSON block wrapped in a <plan> tag, exactly like this, so the interface renders it as a visual route diagram (not text):
+
+<plan>
+{
+  "title": "short plan title",
+  "examDate": "YYYY-MM-DD",
+  "days": [
+    {
+      "date": "YYYY-MM-DD",
+      "label": "Day 1",
+      "focus": "the main focus of this day in one short sentence",
+      "tasks": [
+        { "time": "afternoon", "subject": "subject name", "topic": "sub-topic", "duration": "45 min", "type": "review" }
+      ]
+    }
+  ]
+}
+</plan>
+
+The "type" field must be exactly one of: review, new, practice, test. Keep these enum values and all JSON keys in English exactly as shown, regardless of the response language. Write one or two warm sentences before the block introducing the plan's overall logic (e.g. "the first few days focus on weak points, the last two days are full review and practice tests"). After the JSON, add a short motivating line plus the "Next suggested step" line.
+
+# Other notes
+- If it's early in the conversation and you don't have enough context, ask exactly one specific question to move forward — never more than one question per turn.
+- Be precise: dates must be logical based on today's date and the exam date the student gave you.
+- Use the <quiz> or <plan> tag at most once per reply, and never break the JSON formatting inside them.`;
+
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!API_KEY || API_KEY === 'sk-or-your-actual-key-here' || API_KEY === '***') {
+    renderMessage('bot', t().devWarning);
+    chat.lastElementChild.classList.add('error');
+    return;
+  }
+
+  renderMessage('user', text);
+  history.push({ role: 'user', content: text });
+  input.value = '';
+  input.style.height = 'auto';
+  sendBtn.disabled = true;
+  showTyping();
+
+  const langDirective = `\n\nIMPORTANT: Write your entire reply in ${t().langDirective} — including headings, explanations, the "Next suggested step" line, and all text VALUES inside the <plan> and <quiz> JSON (day labels, subjects, topics, focus text, questions, options, explanations). Still keep the JSON keys and the "type" enum values (review/new/practice/test) in English exactly as specified.`;
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.href,
+        'X-Title': 'MERSA Chat'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: BASE_SYSTEM_PROMPT + `\n\nToday's date: ${new Date().toISOString().slice(0, 10)}` + langDirective },
+          ...history
+        ],
+        temperature: 0.7,
+        max_tokens: 2048
+      })
+    });
+
+    const data = await res.json();
+    removeTyping();
+
+    if (!res.ok) {
+      const errMsg = data.error?.message || 'Server connection error';
+      renderMessage('bot', t().errorPrefix + errMsg);
+      chat.lastElementChild.classList.add('error');
+      history.pop();
+    } else {
+      const reply = data.choices[0].message.content;
+      renderBotMessage(reply);
+      history.push({ role: 'assistant', content: reply });
+      localStorage.setItem('mersa_history_or', JSON.stringify(history));
+    }
+  } catch (err) {
+    removeTyping();
+    renderMessage('bot', t().networkError(err.message));
+    chat.lastElementChild.classList.add('error');
+    history.pop();
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
+</script>
+</body>
+</html>
