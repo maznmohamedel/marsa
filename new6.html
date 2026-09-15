@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MERSA · مِرساة — لا تُذاكر أكثر… ذاكر بذكاء</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+<style>
+  :root{
+    --ink-0:#060f1a; --ink-1:#0b2136; --ink-2:#123049; --ink-3:#173a58;
+    --gold:#e3a857; --gold-soft:#f0cf95; --teal:#3f9e94; --teal-soft:#7ec9bf;
+    --coral:#e2694a; --cream:#f4ecdc; --cream-dim:rgba(244,236,220,0.62);
+    --line:rgba(244,236,220,0.14); --line-strong:rgba(244,236,220,0.28);
+    --shadow:0 25px 60px rgba(2,8,15,0.55);
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family:'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    background: radial-gradient(1100px 700px at 85% -10%, rgba(227,168,87,0.14), transparent 60%),
+                radial-gradient(900px 600px at -10% 20%, rgba(63,158,148,0.12), transparent 55%),
+                linear-gradient(170deg, var(--ink-0), var(--ink-1) 55%, var(--ink-2));
+    color:var(--cream); min-height:100vh; line-height:1.6;
+  }
+  a{ color:inherit; } img,svg{ display:block; max-width:100%; }
+  section{ padding:96px 24px; }
+  .wrap{ max-width:1080px; margin:0 auto; }
+  .eyebrow-rule{ display:flex; align-items:center; gap:10px; color:var(--gold-soft); font-size:0.92rem; margin-bottom:14px; }
+  .eyebrow-rule .rule{ width:28px; height:1px; background:var(--gold); flex-shrink:0; }
+  h1,h2,h3{ font-weight:800; letter-spacing:-0.01em; }
+  h1{ font-size:clamp(2.1rem, 4.2vw, 3.4rem); line-height:1.25; }
+  h2{ font-size:clamp(1.6rem, 2.6vw, 2.2rem); margin-bottom:14px; }
+  p{ color:var(--cream-dim); }
+
+  .site-nav{ position:sticky; top:0; z-index:40; display:flex; align-items:center; justify-content:space-between; padding:14px 24px; background:rgba(6,15,26,0.72); backdrop-filter:blur(14px); border-bottom:1px solid var(--line); }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.15rem; cursor:pointer; }
+  .brand-mark{ width:38px; height:38px; border-radius:10px; background:linear-gradient(150deg, var(--gold), var(--teal)); display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0; }
+  .brand-text .sub{ font-size:0.68rem; font-weight:500; color:var(--teal-soft); }
+  .nav-links{ display:flex; align-items:center; gap:26px; font-size:0.92rem; font-weight:600; }
+  .nav-links a{ text-decoration:none; color:var(--cream-dim); transition:color 0.2s; }
+  .nav-links a:hover{ color:var(--gold-soft); }
+  .nav-right{ display:flex; align-items:center; gap:10px; }
+  .nav-toggle{ display:none; background:none; border:1px solid var(--line-strong); color:var(--cream); width:38px; height:38px; border-radius:9px; font-size:1rem; cursor:pointer; }
+
+  .btn{ padding:10px 18px; border:none; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.9rem; font-family:inherit; transition:transform 0.15s, box-shadow 0.15s; white-space:nowrap; }
+  .btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-soft)); color:#241505; }
+  .btn-gold:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(227,168,87,0.28); }
+  .btn-ghost{ background:transparent; color:var(--cream); border:1px solid var(--line-strong); }
+  .btn-ghost:hover{ border-color:var(--gold-soft); color:var(--gold-soft); }
+  .btn-danger{ background:linear-gradient(135deg, var(--coral), #b6432a); color:#fff; }
+  .btn-lang{ background:rgba(244,236,220,0.08); color:var(--cream); border:1px solid var(--line-strong); }
+  .btn-lang:hover{ background:rgba(244,236,220,0.16); }
+
+  .hero{ padding-top:64px; padding-bottom:48px; }
+  .hero .wrap{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:center; }
+  .hero-copy p.lead{ font-size:1.08rem; max-width:46ch; margin:18px 0 30px; }
+  .hero-ctas{ display:flex; gap:12px; flex-wrap:wrap; }
+  .hero-art{ position:relative; }
+  .hero-art svg{ width:100%; height:auto; }
+
+  .about{ background:rgba(244,236,220,0.025); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .about .wrap{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:56px; align-items:start; }
+  .about-body p{ max-width:52ch; }
+  .steps{ position:relative; }
+  .steps::before{ content:''; position:absolute; inset-inline-start:19px; top:6px; bottom:6px; width:2px; background:repeating-linear-gradient(to bottom, var(--gold) 0 6px, transparent 6px 12px); opacity:0.55; }
+  .step{ position:relative; padding-inline-start:56px; padding-bottom:30px; }
+  .step:last-child{ padding-bottom:0; }
+  .step-num{ position:absolute; inset-inline-start:0; top:0; width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--gold), var(--teal)); color:#1a1206; font-weight:800; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+  .step h3{ font-size:1.05rem; margin-bottom:6px; }
+  .step p{ font-size:0.92rem; max-width:48ch; }
+
+  .features-list{ display:grid; grid-template-columns:repeat(3, 1fr); gap:0; margin-top:36px; border-top:1px solid var(--line); }
+  .feature{ padding:26px 22px 26px 0; border-bottom:1px solid var(--line); }
+  .feature:not(:last-child){ border-inline-end:1px solid var(--line); padding-inline-end:26px; }
+  .feature .ficon{ font-size:1.5rem; margin-bottom:12px; }
+  .feature h3{ font-size:1rem; margin-bottom:8px; }
+  .feature p{ font-size:0.9rem; }
+
+  .app-section{ padding-top:70px; }
+  .app-intro{ text-align:center; max-width:56ch; margin:0 auto 34px; }
+  .app-intro h2{ margin-bottom:10px; }
+  .container { width: 100%; max-width: 960px; height: 640px; margin: 0 auto; background: rgba(244,236,220,0.045); backdrop-filter: blur(15px); border: 1px solid var(--line-strong); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow); }
+  header.app-head { padding: 16px 22px; background: rgba(6,15,26,0.45); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 800; }
+  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), var(--teal)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+  .settings { display: flex; gap: 8px; align-items: center; }
+
+  #chat { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+  #chat::-webkit-scrollbar { width: 8px; }
+  #chat::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 4px; }
+
+  .msg { max-width: 88%; padding: 14px 18px; border-radius: 16px; line-height: 1.8; word-wrap: break-word; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.user { align-self: flex-start; background: linear-gradient(135deg, var(--teal), #2c7970); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot { align-self: flex-end; background: rgba(244,236,220,0.06); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .msg.bot pre { background: rgba(0,0,0,0.35); padding: 10px; border-radius: 8px; overflow-x: auto; margin: 8px 0; direction: ltr; text-align: left; }
+  .msg.bot code { font-family: 'Courier New', monospace; font-size: 0.9rem; }
+  .msg.bot p { margin: 8px 0; color:var(--cream); }
+  .msg.bot ul, .msg.bot ol { margin: 8px 20px; }
+  .msg.bot strong { color: var(--gold-soft); }
+
+  .next-step { align-self: flex-end; max-width: 88%; margin-top: -6px; display: flex; align-items: center; gap: 8px; background: rgba(227,168,87,0.08); border: 1px dashed rgba(227,168,87,0.5); padding: 10px 14px; border-radius: 14px; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; text-align: start; }
+  .next-step:hover { background: rgba(227,168,87,0.18); transform: translateY(-1px); }
+  .next-step .arrow { color: var(--gold-soft); font-size: 1.1rem; }
+
+  .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; justify-content: center; }
+  .action-chip { background: rgba(227,168,87,0.12); border: 1px solid var(--gold); color: var(--gold-soft); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+  .action-chip:hover { background: var(--gold); color: #241505; }
+
+  .typing { align-self: flex-end; padding: 12px 18px; background: rgba(244,236,220,0.06); border-radius: 16px; display: flex; gap: 4px; }
+  .typing span { width: 8px; height: 8px; background: var(--gold-soft); border-radius: 50%; animation: bounce 1.4s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-8px); opacity: 1; } }
+
+  .input-area { padding: 18px; background: rgba(6,15,26,0.45); border-top: 1px solid var(--line); display: flex; gap: 10px; }
+  #userInput { flex: 1; padding: 12px 16px; background: rgba(244,236,220,0.06); border: 1px solid var(--line-strong); border-radius: 12px; color: var(--cream); font-size: 1rem; outline: none; resize: none; min-height: 45px; max-height: 120px; font-family:inherit; }
+  #userInput:focus { border-color: var(--gold-soft); }
+  #sendBtn { padding: 0 22px; background: linear-gradient(135deg, var(--gold), var(--gold-soft)); color: #241505; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 1rem; transition: transform 0.2s; white-space: nowrap; font-family:inherit; }
+  #sendBtn:hover:not(:disabled) { transform: scale(1.05); }
+  #sendBtn:disabled, #attachBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  #attachBtn { padding: 0 14px; background: rgba(244,236,220,0.06); color: var(--cream); border: 1px solid var(--line-strong); border-radius: 12px; cursor: pointer; font-size: 1.15rem; transition: all 0.2s; display: flex; align-items: center; flex-shrink: 0; }
+  #attachBtn:hover:not(:disabled) { border-color: var(--gold-soft); color: var(--gold-soft); background: rgba(244,236,220,0.1); }
+  #fileInput { display: none; }
+
+  .file-preview { align-self: flex-start; max-width: 88%; background: rgba(227,168,87,0.08); border: 1px solid var(--gold); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 0.88rem; animation: fadeIn 0.3s ease; }
+  .file-preview .file-icon { font-size: 1.3rem; }
+  .file-preview .file-info { flex: 1; }
+  .file-preview .file-name { color: var(--gold-soft); font-weight: 600; }
+  .file-preview .file-size { color: var(--cream-dim); font-size: 0.78rem; }
+  .file-preview .file-remove { background: rgba(226,105,74,0.2); border: 1px solid var(--coral); color: #ffcabb; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .file-preview .file-remove:hover { background: rgba(226,105,74,0.4); }
+
+  .welcome { text-align: center; padding: 40px 20px; }
+  .welcome h2 { color: var(--gold-soft); margin-bottom: 10px; font-size: 1.5rem; }
+  .welcome p { font-size: 0.95rem; line-height: 1.8; margin-bottom: 20px; }
+  .error { background: rgba(226,105,74,0.18); border: 1px solid var(--coral); color: #ffcabb; }
+
+  .plan-diagram { align-self: stretch; background: rgba(0,0,0,0.2); border: 1px solid rgba(227,168,87,0.3); border-radius: 18px; padding: 18px 18px 10px; animation: fadeIn 0.35s ease; }
+  .pd-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; padding-bottom: 12px; }
+  .pd-title { font-size: 1.1rem; font-weight: bold; color: var(--gold-soft); }
+  .pd-countdown { background: linear-gradient(135deg, var(--gold), var(--teal)); color: #1a1206; font-weight: bold; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; }
+  .pd-scroll { position: relative; display: flex; align-items: stretch; overflow-x: auto; padding: 10px 6px 14px; gap: 4px; }
+  .pd-scroll::-webkit-scrollbar { height: 8px; }
+  .pd-scroll::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 4px; }
+  .pd-line { position: absolute; top: 170px; left: 20px; right: 20px; height: 2px; background-image: linear-gradient(to right, var(--gold) 60%, rgba(255,255,255,0) 0%); background-size: 14px 2px; background-repeat: repeat-x; opacity: 0.55; z-index: 0; }
+  .pd-node { position: relative; width: 172px; flex-shrink: 0; display: grid; grid-template-rows: 150px 40px 150px; justify-items: center; z-index: 1; }
+  .pd-marker { grid-row: 2; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .pd-dot { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--teal)); color: #1a1206; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 5px rgba(227,168,87,0.14); }
+  .pd-node.today .pd-dot { box-shadow: 0 0 0 5px rgba(227,168,87,0.35); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 5px rgba(227,168,87,0.35); } 50% { box-shadow: 0 0 0 9px rgba(227,168,87,0.15); } }
+  .pd-date { font-size: 0.72rem; color: var(--cream-dim); white-space: nowrap; }
+  .pd-card { width: 158px; background: rgba(244,236,220,0.05); border: 1px solid var(--line); border-radius: 12px; padding: 10px; overflow-y: auto; }
+  .pd-node.up .pd-card { grid-row: 1; align-self: end; }
+  .pd-node.down .pd-card { grid-row: 3; align-self: start; }
+  .pd-focus { font-size: 0.76rem; font-weight: bold; color: var(--gold-soft); margin-bottom: 6px; line-height: 1.4; }
+  .pd-tasks { display: flex; flex-direction: column; gap: 6px; }
+  .pd-task { display: flex; align-items: flex-start; gap: 6px; font-size: 0.74rem; line-height: 1.4; }
+  .pd-task .pd-icon { flex-shrink: 0; }
+  .pd-task .pd-subject { font-weight: bold; }
+  .pd-task .pd-topic { color: var(--cream-dim); display: block; }
+  .pd-task .pd-duration { color: var(--teal-soft); font-size: 0.68rem; }
+  .pd-exam { width: 130px; }
+  .pd-flag { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--coral), #c65735); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 0 5px rgba(226,105,74,0.15); }
+  .pd-exam .pd-date { font-weight: bold; color: var(--coral); }
+
+  .quiz-widget { align-self: stretch; background: rgba(0,0,0,0.2); border: 1px solid rgba(63,158,148,0.35); border-radius: 18px; padding: 20px; animation: fadeIn 0.35s ease; }
+  .quiz-widget .qw-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .quiz-widget .qw-title { font-weight: bold; color: var(--teal-soft); font-size: 1.05rem; }
+  .qw-progress-track { height: 6px; background: rgba(244,236,220,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 18px; }
+  .qw-progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--gold)); transition: width 0.3s ease; }
+  .qw-question { font-size: 1rem; margin-bottom: 16px; line-height: 1.7; }
+  .qw-options { display: flex; flex-direction: column; gap: 10px; }
+  .qw-option { text-align: start; background: rgba(244,236,220,0.05); border: 1px solid var(--line-strong); color: var(--cream); padding: 12px 16px; border-radius: 12px; cursor: pointer; font-size: 0.92rem; font-family:inherit; transition: all 0.2s; }
+  .qw-option:hover:not(:disabled) { border-color: var(--teal-soft); background: rgba(63,158,148,0.12); }
+  .qw-option:disabled { cursor: default; }
+  .qw-option.correct { background: rgba(227,168,87,0.2); border-color: var(--gold); }
+  .qw-option.wrong { background: rgba(226,105,74,0.2); border-color: var(--coral); }
+  .qw-explain { margin-top: 14px; background: rgba(244,236,220,0.04); border-radius: 12px; padding: 12px 16px; font-size: 0.85rem; color: var(--cream-dim); line-height: 1.7; text-align: start; }
+  .qw-next-btn { margin-top: 16px; width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--teal), var(--gold)); color: #14201e; font-weight: bold; cursor: pointer; font-size: 0.95rem; transition: transform 0.2s; font-family:inherit; }
+  .qw-next-btn:hover { transform: translateY(-2px); }
+  .qw-result { text-align: center; }
+  .qw-result .qw-score { font-size: 2.2rem; font-weight: bold; color: var(--gold-soft); margin-bottom: 6px; }
+  .qw-result p { font-size: 0.9rem; margin-bottom: 16px; }
+
+  .contact{ border-top:1px solid var(--line); }
+  .contact .wrap{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:56px; align-items:start; }
+  .contact-info p{ max-width:44ch; margin-bottom:26px; }
+  .contact-chip{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:0.94rem; }
+  .contact-chip .cicon{ width:34px; height:34px; border-radius:9px; background:rgba(227,168,87,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .contact-form{ background:rgba(244,236,220,0.035); border:1px solid var(--line-strong); border-radius:16px; padding:26px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; color:var(--cream-dim); }
+  .field input, .field textarea{ width:100%; padding:11px 14px; background:rgba(244,236,220,0.06); border:1px solid var(--line-strong); border-radius:10px; color:var(--cream); font-family:inherit; font-size:0.94rem; outline:none; resize:vertical; }
+  .field input:focus, .field textarea:focus{ border-color:var(--gold-soft); }
+  .form-note{ font-size:0.78rem; color:var(--cream-dim); margin-top:10px; }
+
+  footer{ padding:36px 24px; border-top:1px solid var(--line); text-align:center; }
+  footer .foot-brand{ font-weight:800; margin-bottom:6px; }
+  footer .foot-tag{ font-size:0.85rem; color:var(--teal-soft); margin-bottom:14px; }
+  footer .foot-rights{ font-size:0.78rem; color:var(--cream-dim); }
+
+  @media (max-width: 900px) {
+    .hero .wrap, .about .wrap, .contact .wrap{ grid-template-columns:1fr; }
+    .hero-art{ order:-1; max-width:340px; margin:0 auto; }
+    .features-list{ grid-template-columns:1fr; }
+    .feature:not(:last-child){ border-inline-end:none; padding-inline-end:0; }
+    .nav-links{ position:absolute; top:100%; inset-inline:0; flex-direction:column; align-items:flex-start; background:rgba(6,15,26,0.97); padding:18px 24px; border-bottom:1px solid var(--line); display:none; gap:16px; }
+    .nav-links.open{ display:flex; }
+    .nav-toggle{ display:inline-flex; align-items:center; justify-content:center; }
+    .container{ height:600px; }
+    .pd-node { width: 140px; grid-template-rows: 170px 40px 170px; }
+    .pd-card { width: 128px; }
+    .pd-line { top: 190px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="brand">
+    <div class="brand-mark">⚓</div>
+    <div class="brand-text">
+      <div>MERSA</div>
+      <div class="sub" id="navSlogan">لا تُذاكر أكثر… ذاكر بذكاء</div>
+    </div>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <span id="navMainLinks" style="display:contents">
+      <a href="#home" id="navHome">الرئيسية</a>
+      <a href="#about" id="navAbout">عن المشروع</a>
+      <a href="#features" id="navFeatures">المميزات</a>
+      <a href="#contact" id="navContact">اتصل بنا</a>
+      <a href="#app" class="btn btn-gold" id="navLaunch">جرّب المساعد</a>
+    </span>
+    <a href="#" class="btn btn-ghost" id="navBackLink" style="display:none">🏠 <span id="navBackLabel">الرئيسية</span></a>
+  </div>
+  <div class="nav-right">
+    <button class="btn btn-lang" id="langBtn">English</button>
+    <button class="nav-toggle" id="navToggle" aria-label="menu">☰</button>
+  </div>
+</nav>
+
+<div id="homePage">
+<main>
+  <section class="hero" id="home">
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="eyebrow-rule"><span class="rule"></span><span id="heroEyebrow">مساعد المذاكرة الذكي</span></div>
+        <h1 id="heroTitle">خطة مذاكرة واضحة، من الآن حتى يوم الامتحان</h1>
+        <p class="lead" id="heroSubtitle">مِرساة يرتّب لك وقتك، ويشخص نقاط ضعفك، ويبني معك خريطة مذاكرة يوماً بيوم — مبنية على وقتك الفعلي، لا على نصائح عامة.</p>
+        <div class="hero-ctas">
+          <a href="#app" class="btn btn-gold" id="heroCtaPrimary">ابدأ الآن ⚓</a>
+          <a href="#about" class="btn btn-ghost" id="heroCtaSecondary">اعرف المزيد</a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <svg viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="beam" cx="80%" cy="18%" r="55%"><stop offset="0%" stop-color="#e3a857" stop-opacity="0.35"/><stop offset="100%" stop-color="#e3a857" stop-opacity="0"/></radialGradient></defs>
+          <circle cx="380" cy="80" r="170" fill="url(#beam)"/>
+          <path d="M60 360 C 140 300, 150 190, 250 150 S 360 90, 400 70" fill="none" stroke="#e3a857" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 14" opacity="0.85"/>
+          <circle cx="160" cy="230" r="9" fill="#3f9e94"/><circle cx="160" cy="230" r="16" fill="none" stroke="#3f9e94" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="255" cy="150" r="9" fill="#e3a857"/><circle cx="255" cy="150" r="16" fill="none" stroke="#e3a857" stroke-width="1.5" opacity="0.5"/>
+          <text x="46" y="372" font-size="34">⚓</text><text x="392" y="82" font-size="34">🏁</text>
+          <text x="120" y="255" font-size="12" fill="#f4ecdc" opacity="0.55" font-family="Cairo">اليوم</text>
+          <text x="235" y="185" font-size="12" fill="#f4ecdc" opacity="0.55" font-family="Cairo">مراجعة</text>
+          <text x="330" y="115" font-size="12" fill="#f4ecdc" opacity="0.55" font-family="Cairo">الامتحان</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="about" id="about">
+    <div class="wrap">
+      <div class="about-body">
+        <div class="eyebrow-rule"><span class="rule"></span><span id="aboutEyebrow">عن المشروع</span></div>
+        <h2 id="aboutTitle">ما هي مِرساة؟</h2>
+        <p id="aboutBody">مِرساة مساعد ذكي للمذاكرة يتحدث إليك كصديق لا كآلة جامدة. أرسل له ملخصك أو حدد موعد امتحانك، فيحول ما في ذهنك من فوضى إلى خطة مرتبة بخطوات واضحة.</p>
+      </div>
+      <div class="steps" id="stepsWrap"></div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="eyebrow-rule"><span class="rule"></span><span id="featEyebrow">المميزات</span></div>
+      <h2 id="featTitle">لِمَ مِرساة مختلف؟</h2>
+      <div class="features-list" id="featuresWrap"></div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <div class="contact-info">
+        <div class="eyebrow-rule"><span class="rule"></span><span id="contactEyebrow">اتصل بنا</span></div>
+        <h2 id="contactTitle">لديك سؤال أو اقتراح؟</h2>
+        <p id="contactBody">أرسل لنا رسالة وسنرد عليك في أقرب وقت. رأيك يساعدنا على تطوير مِرساة أكثر.</p>
+        <div class="contact-chip"><div class="cicon">✉️</div><span id="contactEmailLabel">البريد الإلكتروني: hello@mersa.app</span></div>
+        <div class="contact-chip" id="contactChatChip" style="cursor:pointer"><div class="cicon">💬</div><span id="contactChatLabel">أو جرّب المحادثة في الأعلى لأي استفسار سريع</span></div>
+      </div>
+      <form class="contact-form" id="contactForm">
+        <div class="field"><label id="labelName" for="cfName">الاسم</label><input type="text" id="cfName" required /></div>
+        <div class="field"><label id="labelEmail" for="cfEmail">البريد الإلكتروني</label><input type="email" id="cfEmail" required /></div>
+        <div class="field"><label id="labelMessage" for="cfMessage">رسالتك</label><textarea id="cfMessage" rows="4" required></textarea></div>
+        <button type="submit" class="btn btn-gold" id="cfSubmit" style="width:100%">أرسل الرسالة ✉️</button>
+        <p class="form-note" id="cfNote">سيفتح لك برنامج البريد الإلكتروني لديك لإرسال الرسالة.</p>
+      </form>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="foot-brand">⚓ MERSA</div>
+  <div class="foot-tag" id="footTagline">لا تُذاكر أكثر… ذاكر بذكاء</div>
+  <div class="foot-rights" id="footRights">© 2026 مِرساة. جميع الحقوق محفوظة.</div>
+</footer>
+</div>
+
+<div id="appPage" style="display:none">
+  <section class="app-section" id="app">
+    <div class="wrap">
+      <div class="app-intro">
+        <div class="eyebrow-rule" style="justify-content:center"><span class="rule"></span><span id="appEyebrow">جرّب بنفسك</span></div>
+        <h2 id="appTitle">جرّب المساعد الآن</h2>
+        <p id="appSubtitle">ابدأ المحادثة، وحدد موعد امتحانك، ودع مِرساة يرسم لك الطريق.</p>
+      </div>
+      <div class="container">
+        <header class="app-head">
+          <div class="logo"><div class="logo-icon">⚓</div><div>MERSA</div></div>
+          <div class="settings"><button class="btn btn-danger" id="clearBtn">🗑️ مسح</button></div>
+        </header>
+        <div id="chat"></div>
+        <div class="input-area">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" />
+          <button id="attachBtn" title="إرفاق ملف (PDF, Word, TXT)">📎</button>
+          <textarea id="userInput" placeholder="اكتب سؤالك أو اختر من الإجراءات أعلاه..." rows="1"></textarea>
+          <button id="sendBtn">إرسال ➤</button>
+        </div>
+      </div>
+      <button class="btn btn-ghost" id="appBackLink" style="margin-top:22px">🏠 <span id="appBackLabel">الرجوع إلى الرئيسية</span></button>
+    </div>
+  </section>
+</div>
+
+<script>
+const TXT = {
+  en: {
+    dirLang: 'en', slogan: "Don't study more… study smart", clear: '🗑️ Clear', langBtnLabel: 'العربية',
+    nav: { home:'Home', about:'About', features:'Features', contact:'Contact', launch:'Try the assistant', back:'Home' },
+    hero: { eyebrow:'Your smart study companion', title:'A clear study route, from today to exam day', subtitle:"MERSA organizes your time, diagnoses your weak points, and builds a day-by-day study map.", ctaPrimary:'Start now ⚓', ctaSecondary:'Learn more' },
+    about: { eyebrow:'About the project', title:'What is MERSA?', body:'MERSA is a smart study companion that talks to you like a friend.', steps:[ { title:'📥 Understand the material', desc:'Send your summary or describe the syllabus.' }, { title:'📝 Diagnostic test', desc:'A short 3–6 question test.' }, { title:'📊 Weak-point analysis', desc:'A precise read on your strengths and weaknesses.' }, { title:'📅 A day-by-day plan', desc:'A visual study map.' } ] },
+    features: { eyebrow:'Features', title:'Why MERSA is different', items:[ { icon:'🗺️', title:'A visual map', desc:'See your route to exam day visually.' }, { icon:'🧠', title:'Instant interactive quiz', desc:'Answer interactive multiple-choice questions.' }, { icon:'🌐', title:'Arabic & English', desc:'Switch languages anytime.' } ] },
+    app: { eyebrow:'Try it yourself', title:'Try the assistant now', subtitle:'Start the conversation, set your exam date.' },
+    contact: { eyebrow:'Contact us', title:'Have a question?', body:'Send us a message.', emailLabel:'Email: hello@mersa.app', chatLabel:'Or use the chat above', labelName:'Name', labelEmail:'Email', labelMessage:'Your message', submit:'Send message ✉️', note:'This opens your email app.' },
+    footer: { rights:'© 2026 MERSA. All rights reserved.' },
+    placeholder: 'Type your question or pick an action above...', send: 'Send ➤',
+    welcomeTitle: 'Welcome to MERSA ⚓', welcomeBody: 'Your smart companion.<br>Start your journey below 👇',
+    actions: [ { label: '📄 Upload a file', msg: 'I have a file — how do we get started?' }, { label: '📅 Set exam date', msg: 'I want to set my exam date.' }, { label: '📝 Diagnostic test', msg: 'I want a quick diagnostic test.' }, { label: '📊 Analyze weak points', msg: 'Analyze my weak points.' } ],
+    devWarning: '⚠️ **Developer note:** replace `API_KEY` with your OpenRouter key and `OCR_SPACE_API_KEY` with your OCR.space key.',
+    errorPrefix: '❌ **Error:** ', networkError: (m) => `❌ **Network error:** (${m})`, confirmClear: 'Clear conversation?', nextStepPrefix: "Let's continue: ",
+    planTitleDefault: 'Study Plan', examToday: 'Exam is today! 🔥', examPassed: 'Date passed ✅', daysLeft: (n) => `⏳ ${n} days left`, examFlagLabel: 'Exam',
+    quizTopicDefault: 'Diagnostic Test', correctFeedback: '✅ **Correct!** ', wrongFeedback: "❌ **Not quite.** ", nextQuestion: 'Next question →', showResult: 'Show result 📊',
+    resultGood: 'Excellent! 🎉', resultOk: "Good, we know what to focus on 💪", analyzeBtn: 'Analyze & build plan 📅',
+    quizSummary: (score, total, wrongQs) => `Result: ${score}/${total}.\nWrong: ${wrongQs.join(', ') || 'None'}.\nSuggest a plan.`,
+    langDirective: 'ENGLISH',
+    fileTooLarge: 'File is too large (max 10 MB; PDF uses OCR.space Free limits).', fileUnsupported: 'Unsupported type. Use PDF, Word, or TXT.',
+    fileExtracted: (name, chars) => `File uploaded: **${name}** (${chars} chars)`, fileReadError: 'Failed to read file.', fileEmpty: 'File appears empty.',
+    processingOCR: 'Processing PDF with OCR.space...'
+  },
+  ar: {
+    dirLang: 'ar', slogan: 'لا تُذاكر أكثر… ذاكر بذكاء', clear: '🗑️ مسح', langBtnLabel: 'English',
+    nav: { home:'الرئيسية', about:'عن المشروع', features:'المميزات', contact:'اتصل بنا', launch:'جرّب المساعد', back:'الرئيسية' },
+    hero: { eyebrow:'مساعد المذاكرة الذكي', title:'خطة مذاكرة واضحة، من الآن حتى يوم الامتحان', subtitle:'مِرساة يرتّب لك وقتك، ويشخص نقاط ضعفك، ويبني معك خريطة مذاكرة يوماً بيوم.', ctaPrimary:'ابدأ الآن ⚓', ctaSecondary:'اعرف المزيد' },
+    about: { eyebrow:'عن المشروع', title:'ما هي مِرساة؟', body:'مِرساة مساعد ذكي للمذاكرة يتحدث إليك كصديق لا كآلة جامدة.', steps:[ { title:'📥 فهم المادة', desc:'أرسل له ملخصك أو صف له المنهج.' }, { title:'📝 اختبار تشخيصي', desc:'اختبار قصير من 3 إلى 6 أسئلة.' }, { title:'📊 تحليل نقاط الضعف', desc:'تحديد دقيق لنقاط قوتك وضعفك.' }, { title:'📅 خطة يوماً بيوم', desc:'خريطة مذاكرة مرسومة بصرياً.' } ] },
+    features: { eyebrow:'المميزات', title:'لِمَ مِرساة مختلف؟', items:[ { icon:'🗺️', title:'خطة مرسومة لا جدول ممل', desc:'شاهد رحلتك إلى الامتحان كخريطة بصرية.' }, { icon:'🧠', title:'اختبار تفاعلي فوري', desc:'أجب عن أسئلة اختيار من متعدد تفاعلية.' }, { icon:'🌐', title:'عربي وإنجليزي بلمسة واحدة', desc:'بدّل اللغة في أي وقت.' } ] },
+    app: { eyebrow:'جرّب بنفسك', title:'جرّب المساعد الآن', subtitle:'ابدأ المحادثة، وحدد موعد امتحانك.' },
+    contact: { eyebrow:'اتصل بنا', title:'لديك سؤال أو اقتراح؟', body:'أرسل لنا رسالة وسنرد عليك في أقرب وقت.', emailLabel:'البريد الإلكتروني: hello@mersa.app', chatLabel:'أو جرّب المحادثة في الأعلى', labelName:'الاسم', labelEmail:'البريد الإلكتروني', labelMessage:'رسالتك', submit:'أرسل الرسالة ✉️', note:'سيفتح لك برنامج البريد الإلكتروني لديك.' },
+    footer: { rights:'© 2026 مِرساة. جميع الحقوق محفوظة.' },
+    placeholder: 'اكتب سؤالك أو اختر من الإجراءات أعلاه...', send: 'إرسال ➤',
+    welcomeTitle: 'مرحباً بك في مِرساة ⚓', welcomeBody: 'مساعدك الذكي لتحويل المذاكرة من عبء إلى خطة واضحة.<br>ابدأ رحلتك باختيار أحد الإجراءات التالية 👇',
+    actions: [ { label: '📄 رفع ملخص/ملف', msg: 'لدي ملف أو ملخص، كيف نبدأ؟' }, { label: '📅 تحديد موعد الاختبار', msg: 'أريد تحديد موعد الاختبار ووضع خطة.' }, { label: '📝 اختبار تشخيصي', msg: 'أريد اختباراً تشخيصياً سريعاً.' }, { label: '📊 تحليل نقاط الضعف', msg: 'حلل نقاط ضعفي واقترح خطة.' } ],
+    devWarning: '⚠️ **تنبيه للمطور:** استبدل `API_KEY` بمفتاح OpenRouter و`OCR_SPACE_API_KEY` بمفتاح OCR.space.',
+    errorPrefix: '❌ **خطأ:** ', networkError: (m) => `❌ **خطأ في الشبكة:** (${m})`, confirmClear: 'هل تريد مسح المحادثة بالكامل؟', nextStepPrefix: 'حسناً، لِنُكمل: ',
+    planTitleDefault: 'خطة المذاكرة', examToday: '🔥 الاختبار اليوم!', examPassed: '✅ الموعد قد فات', daysLeft: (n) => `⏳ تبقّى ${n} ${n === 1 ? 'يوم' : (n === 2 ? 'يومان' : (n <= 10 ? 'أيام' : 'يوم'))}`, examFlagLabel: 'الاختبار',
+    quizTopicDefault: 'اختبار تشخيصي سريع', correctFeedback: '✅ **إجابة صحيحة!** ', wrongFeedback: '❌ **ليست الإجابة الصحيحة.** ', nextQuestion: 'السؤال التالي ←', showResult: 'عرض النتيجة 📊',
+    resultGood: 'ممتاز! مستواك قوي في هذه المادة 🎉', resultOk: 'جيد، الآن عرفنا نقاط الضعف بدقة 💪', analyzeBtn: 'حلل نتيجتي واقترح خطة 📅',
+    quizSummary: (score, total, wrongQs) => `نتيجتي: ${score} من ${total}.\nالأخطاء: ${wrongQs.join('، ') || 'لا يوجد'}.\nحلل نقاط ضعفي واقترح خطة.`,
+    langDirective: 'ARABIC',
+    fileTooLarge: 'الملف كبير جداً (الحد الأقصى 10 ميجابايت؛ وملفات PDF تخضع لحدود OCR.space Free).', fileUnsupported: 'نوع الملف غير مدعوم. يُرجى رفع PDF أو Word أو TXT.',
+    fileExtracted: (name, chars) => `تم رفع الملف: **${name}** (${chars} حرف)`, fileReadError: 'تعذّر قراءة الملف.', fileEmpty: 'يبدو أن الملف فارغ أو غير قابل للقراءة.',
+    processingOCR: 'جاري قراءة ملف PDF عبر OCR.space...'
+  }
+};
+
+let currentLang = localStorage.getItem('mersa_lang') || 'ar';
+const chat = document.getElementById('chat');
+const input = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+const langBtn = document.getElementById('langBtn');
+const navToggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+const fileInput = document.getElementById('fileInput');
+const attachBtn = document.getElementById('attachBtn');
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+let chatHistory = [];
+let pendingFileText = '';
+let currentProcessingMsg = null;
+
+function t() { return TXT[currentLang]; }
+
+navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+const homePage = document.getElementById('homePage');
+const appPage = document.getElementById('appPage');
+const navMainLinks = document.getElementById('navMainLinks');
+const navBackLink = document.getElementById('navBackLink');
+
+function setPage(page) {
+  const isApp = page === 'app';
+  homePage.style.display = isApp ? 'none' : '';
+  appPage.style.display = isApp ? '' : 'none';
+  navMainLinks.style.display = isApp ? 'none' : 'contents';
+  navBackLink.style.display = isApp ? '' : 'none';
+  window.scrollTo(0, 0);
+}
+function goToApp(e) { 
+  if (e) e.preventDefault(); 
+  setPage('app'); 
+  if (location.hash !== '#app') window.history.pushState({ page: 'app' }, '', '#app'); 
+}
+function goToHome(e) { 
+  if (e) e.preventDefault(); 
+  setPage('home'); 
+  if (location.hash) window.history.pushState({ page: 'home' }, '', location.pathname + location.search); 
+}
+window.addEventListener('popstate', () => setPage(location.hash === '#app' ? 'app' : 'home'));
+document.getElementById('heroCtaPrimary').addEventListener('click', goToApp);
+document.getElementById('navLaunch').addEventListener('click', goToApp);
+document.getElementById('navBackLink').addEventListener('click', goToHome);
+document.getElementById('appBackLink').addEventListener('click', goToHome);
+document.getElementById('contactChatChip').addEventListener('click', goToApp);
+document.querySelector('.brand').addEventListener('click', goToHome);
+setPage(location.hash === '#app' ? 'app' : 'home');
+
+function renderSteps() {
+  document.getElementById('stepsWrap').innerHTML = t().about.steps.map((s, i) => `<div class="step"><div class="step-num">${i + 1}</div><h3>${s.title}</h3><p>${s.desc}</p></div>`).join('');
+}
+function renderFeatures() {
+  document.getElementById('featuresWrap').innerHTML = t().features.items.map(f => `<div class="feature"><div class="ficon">${f.icon}</div><h3>${f.title}</h3><p>${f.desc}</p></div>`).join('');
+}
+function applyLanguage(lang, opts = {}) {
+  currentLang = lang;
+  localStorage.setItem('mersa_lang', lang);
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('navSlogan').textContent = t().slogan;
+  clearBtn.textContent = t().clear;
+  langBtn.textContent = t().langBtnLabel;
+  input.placeholder = t().placeholder;
+  sendBtn.textContent = t().send;
+  document.getElementById('navHome').textContent = t().nav.home;
+  document.getElementById('navAbout').textContent = t().nav.about;
+  document.getElementById('navFeatures').textContent = t().nav.features;
+  document.getElementById('navContact').textContent = t().nav.contact;
+  document.getElementById('navLaunch').textContent = t().nav.launch;
+  document.getElementById('navBackLabel').textContent = t().nav.back;
+  document.getElementById('appBackLabel').textContent = t().nav.back;
+  document.getElementById('heroEyebrow').textContent = t().hero.eyebrow;
+  document.getElementById('heroTitle').textContent = t().hero.title;
+  document.getElementById('heroSubtitle').textContent = t().hero.subtitle;
+  document.getElementById('heroCtaPrimary').textContent = t().hero.ctaPrimary;
+  document.getElementById('heroCtaSecondary').textContent = t().hero.ctaSecondary;
+  document.getElementById('aboutEyebrow').textContent = t().about.eyebrow;
+  document.getElementById('aboutTitle').textContent = t().about.title;
+  document.getElementById('aboutBody').textContent = t().about.body;
+  renderSteps();
+  document.getElementById('featEyebrow').textContent = t().features.eyebrow;
+  document.getElementById('featTitle').textContent = t().features.title;
+  renderFeatures();
+  document.getElementById('appEyebrow').textContent = t().app.eyebrow;
+  document.getElementById('appTitle').textContent = t().app.title;
+  document.getElementById('appSubtitle').textContent = t().app.subtitle;
+  document.getElementById('contactEyebrow').textContent = t().contact.eyebrow;
+  document.getElementById('contactTitle').textContent = t().contact.title;
+  document.getElementById('contactBody').textContent = t().contact.body;
+  document.getElementById('contactEmailLabel').textContent = t().contact.emailLabel;
+  document.getElementById('contactChatLabel').textContent = t().contact.chatLabel;
+  document.getElementById('labelName').textContent = t().contact.labelName;
+  document.getElementById('labelEmail').textContent = t().contact.labelEmail;
+  document.getElementById('labelMessage').textContent = t().contact.labelMessage;
+  document.getElementById('cfSubmit').textContent = t().contact.submit;
+  document.getElementById('cfNote').textContent = t().contact.note;
+  document.getElementById('footTagline').textContent = t().slogan;
+  document.getElementById('footRights').textContent = t().footer.rights;
+  if (!opts.skipWelcomeRerender && chat.querySelector('.welcome')) renderWelcome();
+}
+function renderWelcome() {
+  chat.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'welcome';
+  div.innerHTML = `<h2>${t().welcomeTitle}</h2><p>${t().welcomeBody}</p><div class="quick-actions"></div>`;
+  const actionsWrap = div.querySelector('.quick-actions');
+  t().actions.forEach(a => {
+    const chip = document.createElement('div');
+    chip.className = 'action-chip';
+    chip.textContent = a.label;
+    chip.onclick = () => setInput(a.msg);
+    actionsWrap.appendChild(chip);
+  });
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+langBtn.addEventListener('click', () => applyLanguage(currentLang === 'en' ? 'ar' : 'en'));
+
+document.getElementById('contactForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('cfName').value.trim();
+  const email = document.getElementById('cfEmail').value.trim();
+  const message = document.getElementById('cfMessage').value.trim();
+  window.location.href = `mailto:hello@mersa.app?subject=${encodeURIComponent(`MERSA — ${name}`)}&body=${encodeURIComponent(`${message}\n\n—\n${name} (${email})`)}`;
+});
+
+/* ==================== File handling ==================== */
+attachBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  // General upload limit. PDF files are compressed automatically below
+  // before being sent to OCR.space.
+  const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
+
+  if (file.size > MAX_UPLOAD_SIZE) {
+    renderMessage('bot', t().errorPrefix + t().fileTooLarge);
+    chat.lastElementChild.classList.add('error');
+    fileInput.value = '';
+    return;
+  }
+
+  let extractedText = '';
+
+  try {
+    if (ext === 'pdf') {
+      updateProcessingMessage(t().processingOCR);
+      extractedText = await extractPdf(file);
+      clearProcessingMessage();
+    } else if (ext === 'docx' || ext === 'doc') {
+      extractedText = await extractDocx(file);
+    } else if (ext === 'txt') {
+      extractedText = await file.text();
+    } else {
+      renderMessage('bot', t().errorPrefix + t().fileUnsupported);
+      chat.lastElementChild.classList.add('error');
+      fileInput.value = '';
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+    clearProcessingMessage();
+    renderMessage('bot', t().errorPrefix + t().fileReadError);
+    chat.lastElementChild.classList.add('error');
+    fileInput.value = '';
+    return;
+  }
+
+  extractedText = extractedText.trim();
+  if (!extractedText) {
+    renderMessage('bot', t().errorPrefix + t().fileEmpty);
+    chat.lastElementChild.classList.add('error');
+    fileInput.value = '';
+    return;
+  }
+
+  const MAX_CHARS = 12000;
+  if (extractedText.length > MAX_CHARS) {
+    extractedText = extractedText.slice(0, MAX_CHARS) + '\n... [تم اقتطاع باقي المحتوى لطوله]';
+  }
+
+  pendingFileText = extractedText;
+  showFilePreview(file, extractedText);
+  fileInput.value = '';
+});
+
+async function extractPdf(file) {
+  /*
+   * OCR.space Free API allows a maximum of 3 PDF pages per request.
+   * Therefore, PDFs with more than 3 pages are automatically split into
+   * batches of 3 pages, each batch is compressed below 1 MB, sent to OCR.space,
+   * and the extracted text is combined in the original page order.
+   */
+
+  const OCR_MAX_SIZE = 1 * 1024 * 1024;
+  const SAFE_SIZE = 950 * 1024;
+  const MAX_PAGES_PER_REQUEST = 3;
+
+  if (!window.pdfjsLib) {
+    throw new Error('PDF.js is not loaded.');
+  }
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    throw new Error('jsPDF is not loaded.');
+  }
+
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  const totalPages = pdf.numPages;
+
+  let fullText = '';
+  const totalBatches = Math.ceil(totalPages / MAX_PAGES_PER_REQUEST);
+
+  for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+    const startPage = batchIndex * MAX_PAGES_PER_REQUEST + 1;
+    const endPage = Math.min(
+      startPage + MAX_PAGES_PER_REQUEST - 1,
+      totalPages
+    );
+
+    updateProcessingMessage(
+      currentLang === 'ar'
+        ? `جاري تجهيز الصفحات ${startPage} - ${endPage} من ${totalPages}... (الجزء ${batchIndex + 1} من ${totalBatches})`
+        : `Preparing pages ${startPage}-${endPage} of ${totalPages}... (part ${batchIndex + 1} of ${totalBatches})`
+    );
+
+    let pdfToSend;
+
+    // If the whole original PDF is already small AND this is a single batch,
+    // send it directly. Otherwise create a 3-page-or-less PDF for this batch.
+    if (totalPages <= MAX_PAGES_PER_REQUEST && file.size <= OCR_MAX_SIZE) {
+      pdfToSend = file;
+    } else {
+      pdfToSend = await compressPdfForOCR(
+        pdf,
+        SAFE_SIZE,
+        startPage,
+        endPage
+      );
+    }
+
+    if (pdfToSend.size > OCR_MAX_SIZE) {
+      throw new Error(
+        currentLang === 'ar'
+          ? `تعذر تجهيز الجزء ${batchIndex + 1} ليكون أقل من 1 ميجا.`
+          : `Could not prepare part ${batchIndex + 1} below 1 MB.`
+      );
+    }
+
+    console.log(
+      `OCR batch ${batchIndex + 1}/${totalBatches}: ` +
+      `pages ${startPage}-${endPage}, ` +
+      `${(pdfToSend.size / 1024).toFixed(1)} KB`
+    );
+
+    const formData = new FormData();
+    formData.append(
+      'file',
+      pdfToSend,
+      file.name.replace(/\.pdf$/i, `_part_${batchIndex + 1}.pdf`)
+    );
+    formData.append('language', 'auto');
+    formData.append('OCREngine', '3');
+    formData.append('isTable', 'true');
+    formData.append('detectOrientation', 'true');
+    formData.append('scale', 'true');
+    formData.append('isOverlayRequired', 'false');
+
+    updateProcessingMessage(
+      currentLang === 'ar'
+        ? `جاري قراءة الصفحات ${startPage} - ${endPage} بواسطة OCR.space...`
+        : `OCR.space is reading pages ${startPage}-${endPage}...`
+    );
+
+    const response = await fetch('https://api.ocr.space/parse/image', {
+      method: 'POST',
+      headers: {
+        'apikey': OCR_SPACE_API_KEY
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`OCR.space HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.IsErroredOnProcessing) {
+      const details = Array.isArray(data.ErrorMessage)
+        ? data.ErrorMessage.join(' ')
+        : (data.ErrorMessage || data.ErrorDetails || 'OCR.space failed to process the PDF.');
+
+      throw new Error(
+        currentLang === 'ar'
+          ? `خطأ في الجزء ${batchIndex + 1}: ${details}`
+          : `Error in part ${batchIndex + 1}: ${details}`
+      );
+    }
+
+    if (!Array.isArray(data.ParsedResults)) {
+      throw new Error(
+        currentLang === 'ar'
+          ? `OCR.space لم يرجع صفحات للجزء ${batchIndex + 1}.`
+          : `OCR.space returned no pages for part ${batchIndex + 1}.`
+      );
+    }
+
+    data.ParsedResults.forEach((page, index) => {
+      const pageText = (page.ParsedText || '').trim();
+      const actualPageNumber = startPage + index;
+
+      if (pageText) {
+        fullText += `\n===== ${currentLang === 'ar' ? 'الصفحة' : 'PAGE'} ${actualPageNumber} =====\n`;
+        fullText += pageText;
+        fullText += '\n';
+      }
+
+      if (page.ErrorMessage || page.ErrorDetails) {
+        console.warn(
+          `OCR.space page ${actualPageNumber} error:`,
+          page.ErrorMessage,
+          page.ErrorDetails
+        );
+      }
+    });
+
+    updateProcessingMessage(
+      currentLang === 'ar'
+        ? `تمت قراءة الصفحات ${startPage} - ${endPage} من ${totalPages}.`
+        : `Pages ${startPage}-${endPage} of ${totalPages} completed.`
+    );
+  }
+
+  fullText = fullText.trim();
+
+  if (!fullText) {
+    throw new Error(
+      currentLang === 'ar'
+        ? 'لم يتم استخراج أي نص من ملف PDF.'
+        : 'No text could be extracted from the PDF.'
+    );
+  }
+
+  return fullText;
+}
+
+async function compressPdfForOCR(pdf, targetSize, startPage = 1, endPage = pdf.numPages) {
+  /*
+   * Render each PDF page as a JPEG, rebuild a new PDF with jsPDF,
+   * and try several compression levels until the result is below targetSize.
+   */
+
+  const attempts = [
+    { scale: 1.00, quality: 0.60 },
+    { scale: 0.90, quality: 0.52 },
+    { scale: 0.80, quality: 0.45 },
+    { scale: 0.70, quality: 0.40 },
+    { scale: 0.62, quality: 0.36 },
+    { scale: 0.55, quality: 0.32 },
+    { scale: 0.48, quality: 0.28 },
+    { scale: 0.42, quality: 0.24 }
+  ];
+
+  let smallestPdf = null;
+
+  for (let attempt = 0; attempt < attempts.length; attempt++) {
+    const level = attempts[attempt];
+
+    updateProcessingMessage(
+      currentLang === 'ar'
+        ? `جاري ضغط PDF... محاولة ${attempt + 1} من ${attempts.length}`
+        : `Compressing PDF... attempt ${attempt + 1} of ${attempts.length}`
+    );
+
+    const blob = await buildCompressedPdf(
+      pdf,
+      level.scale,
+      level.quality,
+      startPage,
+      endPage
+    );
+
+    if (!smallestPdf || blob.size < smallestPdf.size) {
+      smallestPdf = blob;
+    }
+
+    const sizeKb = blob.size / 1024;
+
+    console.log(
+      `PDF compression attempt ${attempt + 1}: ` +
+      `${sizeKb.toFixed(1)} KB ` +
+      `(scale=${level.scale}, quality=${level.quality})`
+    );
+
+    if (blob.size <= targetSize) {
+      updateProcessingMessage(
+        currentLang === 'ar'
+          ? `تم ضغط PDF إلى ${sizeKb.toFixed(0)} KB، جاري إرساله...`
+          : `PDF compressed to ${sizeKb.toFixed(0)} KB, sending...`
+      );
+
+      return new File(
+        [blob],
+        'compressed_ocr.pdf',
+        { type: 'application/pdf' }
+      );
+    }
+  }
+
+  if (smallestPdf && smallestPdf.size <= 1024 * 1024) {
+    updateProcessingMessage(
+      currentLang === 'ar'
+        ? `تم ضغط PDF إلى ${(smallestPdf.size / 1024).toFixed(0)} KB، جاري إرساله...`
+        : `PDF compressed to ${(smallestPdf.size / 1024).toFixed(0)} KB, sending...`
+    );
+
+    return new File(
+      [smallestPdf],
+      'compressed_ocr.pdf',
+      { type: 'application/pdf' }
+    );
+  }
+
+  throw new Error(
+    currentLang === 'ar'
+      ? 'تعذر ضغط ملف PDF إلى أقل من 1 ميجابايت. جرّب ملفًا أقل دقة أو عدد صفحات أقل.'
+      : 'Could not compress the PDF below 1 MB. Try a lower-resolution PDF or fewer pages.'
+  );
+}
+
+async function buildCompressedPdf(pdf, scale, quality, startPage = 1, endPage = pdf.numPages) {
+  const { jsPDF } = window.jspdf;
+  let pdfDoc = null;
+
+  for (let pageNumber = startPage; pageNumber <= endPage; pageNumber++) {
+    updateProcessingMessage(
+      currentLang === 'ar'
+        ? `جاري ضغط الصفحة ${pageNumber} من ${endPage}...`
+        : `Compressing page ${pageNumber} of ${endPage}...`
+    );
+
+    const page = await pdf.getPage(pageNumber);
+    const viewport = page.getViewport({ scale });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.ceil(viewport.width));
+    canvas.height = Math.max(1, Math.ceil(viewport.height));
+
+    const context = canvas.getContext('2d', {
+      alpha: false,
+      willReadFrequently: false
+    });
+
+    if (!context) {
+      throw new Error('Could not create canvas context.');
+    }
+
+    // White background prevents transparent areas from becoming black in JPEG.
+    context.fillStyle = '#FFFFFF';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
+
+    const imageDataUrl = canvas.toDataURL('image/jpeg', quality);
+
+    const pageWidth = viewport.width;
+    const pageHeight = viewport.height;
+    const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
+
+    if (!pdfDoc) {
+      pdfDoc = new jsPDF({
+        orientation,
+        unit: 'pt',
+        format: [pageWidth, pageHeight],
+        compress: true,
+        putOnlyUsedFonts: true
+      });
+    } else {
+      pdfDoc.addPage(
+        [pageWidth, pageHeight],
+        orientation
+      );
+    }
+
+    pdfDoc.addImage(
+      imageDataUrl,
+      'JPEG',
+      0,
+      0,
+      pageWidth,
+      pageHeight,
+      undefined,
+      'FAST'
+    );
+
+    // Release canvas memory before moving to the next page.
+    canvas.width = 1;
+    canvas.height = 1;
+  }
+
+  if (!pdfDoc) {
+    throw new Error('PDF has no pages.');
+  }
+
+  return pdfDoc.output('blob');
+}
+
+function updateProcessingMessage(msg) {
+  if (!currentProcessingMsg) {
+    currentProcessingMsg = document.createElement('div');
+    currentProcessingMsg.className = 'msg bot';
+    currentProcessingMsg.style.fontStyle = 'italic';
+    currentProcessingMsg.style.opacity = '0.8';
+    chat.appendChild(currentProcessingMsg);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  currentProcessingMsg.innerHTML = `⏳ ${msg}`;
+}
+
+function clearProcessingMessage() {
+  if (currentProcessingMsg) {
+    currentProcessingMsg.remove();
+    currentProcessingMsg = null;
+  }
+}
+
+function cleanArabicOCR(text) {
+  return text
+    .replace(/([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF])\s+([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF])/g, '$1$2')
+    .replace(/ـ+/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[^\w\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF0-9.,\-:()?!%]/g, '')
+    .trim();
+}
+
+async function extractDocx(file) {
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: buf });
+  return result.value;
+}
+
+function showFilePreview(file, text) {
+  const existing = chat.querySelector('.file-preview');
+  if (existing) existing.remove();
+  const welcome = chat.querySelector('.welcome');
+  if (welcome) welcome.remove();
+
+  const sizeKb = (file.size / 1024).toFixed(1);
+  const div = document.createElement('div');
+  div.className = 'file-preview';
+  div.innerHTML = `
+    <span class="file-icon">📄</span>
+    <div class="file-info">
+      <div class="file-name">${escapeHtml(file.name)}</div>
+      <div class="file-size">${sizeKb} KB · ${text.length} حرف — تم استخراج النص وإرساله للمحادثة</div>
+    </div>
+    <button class="file-remove" title="إزالة">✕</button>
+  `;
+  div.querySelector('.file-remove').onclick = () => {
+    pendingFileText = '';
+    div.remove();
+  };
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* ==================== Init / persistence ==================== */
+// OCR.space API key — used ONLY for reading PDF files.
+const OCR_SPACE_API_KEY = 'PUT_YOUR_OCR_SPACE_API_KEY_HERE';
+
+const API_KEY = 'PUT_YOUR_OPENROUTER_API_KEY_HERE';
+const MODEL = 'openrouter/free';
+const savedHistory = localStorage.getItem('mersa_history_or');
+applyLanguage(currentLang, { skipWelcomeRerender: true });
+if (savedHistory) {
+  try {
+    chatHistory = JSON.parse(savedHistory);
+    chatHistory.forEach(m => {
+      if (m.role === 'user') renderMessage('user', m.content);
+      else renderBotMessage(m.content);
+    });
+  } catch (e) { chatHistory = []; }
+}
+if (!chat.children.length) renderWelcome();
+
+function setInput(text) {
+  input.value = text;
+  input.focus();
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  document.getElementById('app').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+clearBtn.addEventListener('click', () => {
+  if (confirm(t().confirmClear)) {
+    chatHistory = [];
+    localStorage.removeItem('mersa_history_or');
+    location.reload();
+  }
+});
+
+function formatText(text) {
+  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (m, lang, code) => `<pre><code>${escapeHtml(code.trim())}</code></pre>`);
+  text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  text = text.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>');
+  text = text.split(/\n\n+/).map(p => {
+    if (p.startsWith('<pre>') || p.startsWith('<ul>') || p.startsWith('<ol>')) return p;
+    return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+  }).join('');
+  return text;
+}
+
+function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function renderMessage(type, text) {
+  const welcome = chat.querySelector('.welcome');
+  if (welcome) welcome.remove();
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.innerHTML = type === 'bot' ? formatText(text) : escapeHtml(text).replace(/\n/g, '<br>');
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function extractSpecialBlocks(raw) {
+  let text = typeof raw === 'string' ? raw : '';
+  let plan = null;
+  let quiz = null;
+
+  function cleanJsonBlock(value) {
+    let s = String(value || '').trim();
+
+    s = s
+      .replace(/^\uFEFF/, '')
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+
+    const firstBrace = s.indexOf('{');
+    const lastBrace = s.lastIndexOf('}');
+
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      s = s.slice(firstBrace, lastBrace + 1);
+    }
+
+    return s;
+  }
+
+  function parseJsonBlock(value, label) {
+    const cleaned = cleanJsonBlock(value);
+
+    try {
+      const parsed = JSON.parse(cleaned);
+      console.log(label + ' parsed successfully:', parsed);
+      return parsed;
+    } catch (error) {
+      console.error(label + ' JSON parse error:', error);
+      console.error(label + ' raw block:', value);
+      console.error(label + ' cleaned block:', cleaned);
+      return null;
+    }
+  }
+
+  const planMatch = text.match(/<plan\s*>([\s\S]*?)<\/plan\s*>/i);
+
+  if (planMatch) {
+    plan = parseJsonBlock(planMatch[1], 'PLAN');
+
+    if (
+      !plan ||
+      typeof plan !== 'object' ||
+      !Array.isArray(plan.days)
+    ) {
+      console.error('PLAN rejected: missing valid days array.', plan);
+      plan = null;
+    }
+
+    text = text.replace(planMatch[0], '');
+  }
+
+  const quizMatch = text.match(/<quiz\s*>([\s\S]*?)<\/quiz\s*>/i);
+
+  if (quizMatch) {
+    quiz = parseJsonBlock(quizMatch[1], 'QUIZ');
+
+    if (
+      !quiz ||
+      typeof quiz !== 'object' ||
+      !Array.isArray(quiz.questions)
+    ) {
+      console.error('QUIZ rejected: missing valid questions array.', quiz);
+      quiz = null;
+    }
+
+    text = text.replace(quizMatch[0], '');
+  }
+
+  return {
+    text: text.trim(),
+    plan,
+    quiz
+  };
+}
+
+function extractNextStep(text) {
+  const m = text.match(/(?:Next suggested step|الخطوة التالية المقترحة):?\**\s*[:\-]?\s*(.+)/i);
+  if (!m) return { text, nextStep: null };
+  const nextStep = m[1].replace(/\*+$/, '').trim();
+  const cleaned = text.replace(m[0], '').trim();
+  return { text: cleaned, nextStep };
+}
+
+function renderBotMessage(rawText) {
+  const { text: withoutBlocks, plan, quiz } = extractSpecialBlocks(rawText);
+  const { text: finalText, nextStep } = extractNextStep(withoutBlocks);
+  if (finalText) renderMessage('bot', finalText);
+  if (plan) renderPlanDiagram(plan);
+  if (quiz) renderQuizWidget(quiz);
+  if (nextStep) renderNextStepChip(nextStep);
+}
+
+function renderNextStepChip(nextStepText) {
+  const div = document.createElement('div');
+  div.className = 'next-step';
+  div.innerHTML = `<span class="arrow">➡️</span><span>${escapeHtml(nextStepText)}</span>`;
+  div.onclick = () => { input.value = t().nextStepPrefix + nextStepText; sendMessage(); };
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+const TASK_ICONS = { review: '📖', new: '✨', practice: '💪', test: '🧪' };
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  if (isNaN(target)) return null;
+  const now = new Date(); now.setHours(0,0,0,0); target.setHours(0,0,0,0);
+  return Math.round((target - now) / 86400000);
+}
+function isToday(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr), n = new Date();
+  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+}
+
+function renderPlanDiagram(plan) {
+  const wrap = document.createElement('div');
+  wrap.className = 'plan-diagram';
+  const remaining = daysUntil(plan.examDate);
+  let countdownText = remaining !== null ? (remaining > 0 ? t().daysLeft(remaining) : remaining === 0 ? t().examToday : t().examPassed) : '';
+  let nodesHtml = '';
+  (plan.days || []).forEach((day, i) => {
+    const dir = i % 2 === 0 ? 'up' : 'down';
+    const today = isToday(day.date);
+    const tasksHtml = (day.tasks || []).map(tsk => `<div class="pd-task"><span class="pd-icon">${TASK_ICONS[tsk.type] || '📌'}</span><span><span class="pd-subject">${escapeHtml(tsk.subject || '')}</span>${tsk.topic ? `<span class="pd-topic">${escapeHtml(tsk.topic)}</span>` : ''}${tsk.duration ? `<span class="pd-duration">${escapeHtml(tsk.duration)}</span>` : ''}</span></div>`).join('');
+    nodesHtml += `<div class="pd-node ${dir} ${today ? 'today' : ''}"><div class="pd-card">${day.focus ? `<div class="pd-focus">${escapeHtml(day.focus)}</div>` : ''}<div class="pd-tasks">${tasksHtml}</div></div><div class="pd-marker"><div class="pd-dot">${i + 1}</div><div class="pd-date">${escapeHtml(day.label || '')}${day.date ? ' · ' + escapeHtml(day.date) : ''}</div></div></div>`;
+  });
+  nodesHtml += `<div class="pd-node pd-exam"><div class="pd-marker" style="grid-row:2"><div class="pd-flag">🏁</div><div class="pd-date">${t().examFlagLabel}${plan.examDate ? ' · ' + escapeHtml(plan.examDate) : ''}</div></div></div>`;
+  wrap.innerHTML = `<div class="pd-head"><span class="pd-title">📅 ${escapeHtml(plan.title || t().planTitleDefault)}</span>${countdownText ? `<span class="pd-countdown">${countdownText}</span>` : ''}</div><div class="pd-scroll"><div class="pd-line"></div>${nodesHtml}</div>`;
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function renderQuizWidget(quiz) {
+  const wrap = document.createElement('div');
+  wrap.className = 'quiz-widget';
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+  const questions = quiz.questions || [];
+  let current = 0;
+  const answers = [];
+
+  function renderQuestion() {
+    const q = questions[current];
+    const progress = Math.round((current / questions.length) * 100);
+    wrap.innerHTML = `<div class="qw-head"><span class="qw-title">📝 ${escapeHtml(quiz.topic || t().quizTopicDefault)}</span><span style="font-size:0.8rem;color:var(--cream-dim)">${current + 1} / ${questions.length}</span></div><div class="qw-progress-track"><div class="qw-progress-fill" style="width:${progress}%"></div></div><div class="qw-question">${escapeHtml(q.question)}</div><div class="qw-options">${q.options.map((opt, i) => `<button class="qw-option" data-i="${i}">${escapeHtml(opt)}</button>`).join('')}</div>`;
+    wrap.querySelectorAll('.qw-option').forEach(btn => btn.addEventListener('click', () => selectAnswer(parseInt(btn.dataset.i))));
+  }
+
+  function selectAnswer(i) {
+    const q = questions[current];
+    const isCorrect = i === q.correctIndex;
+    answers.push({ correct: isCorrect, question: q.question });
+    wrap.querySelectorAll('.qw-option').forEach((btn, idx) => {
+      btn.disabled = true;
+      if (idx === q.correctIndex) btn.classList.add('correct');
+      else if (idx === i) btn.classList.add('wrong');
+    });
+    const explainDiv = document.createElement('div');
+    explainDiv.className = 'qw-explain';
+    explainDiv.innerHTML = (isCorrect ? t().correctFeedback : t().wrongFeedback) + escapeHtml(q.explanation || '');
+    wrap.appendChild(explainDiv);
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'qw-next-btn';
+    nextBtn.textContent = current < questions.length - 1 ? t().nextQuestion : t().showResult;
+    nextBtn.onclick = () => { current++; if (current < questions.length) renderQuestion(); else showResult(); };
+    wrap.appendChild(nextBtn);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function showResult() {
+    const score = answers.filter(a => a.correct).length;
+    const wrongTopics = answers.filter(a => !a.correct).map(a => a.question);
+    wrap.innerHTML = `<div class="qw-result"><div class="qw-score">${score} / ${questions.length}</div><p>${score === questions.length ? t().resultGood : t().resultOk}</p><button class="qw-next-btn" id="analyzeBtn">${t().analyzeBtn}</button></div>`;
+    document.getElementById('analyzeBtn').onclick = () => { input.value = t().quizSummary(score, questions.length, wrongTopics); sendMessage(); };
+    chat.scrollTop = chat.scrollHeight;
+  }
+  renderQuestion();
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.id = 'typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function removeTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+
+const BASE_SYSTEM_PROMPT = `You are "MERSA", a smart study-planning assistant. Your motto: "Don't study more… study smart."
+
+# Personality and tone
+- You are warm, friendly, and encouraging — like a capable friend helping a classmate before an exam, not a dry customer-support bot.
+- Your replies are **detailed and genuinely useful**, not one-liners. When you explain something, explain it well with examples; when you propose a plan, explain the reasoning behind each part of it.
+- Use headings, short paragraphs, bold text, and lists so replies are easy to scan. Use emoji moderately (one or two per section, not per sentence).
+- Be empathetic about exam stress and studying pressure, and project genuine confidence that the student can get there.
+- When speaking Arabic, ALWAYS use **Modern Standard Arabic (الفصحى)** — never use any regional dialect (Egyptian, Levantine, Gulf, etc.). Use formal vocabulary and correct grammar.
+
+# Workflow stages
+1. 📥 **Understand the material**: help the student summarize or extract the key ideas from what they uploaded or described.
+2. 📅 **Set the date**: ask about the exam date and available time, then start thinking about how to spread the days.
+3. 📝 **Diagnose**: run a short test (3–6 questions) to measure the student's current level.
+4. 📊 **Analyze**: once the test result comes back, identify strengths and weaknesses clearly and specifically.
+5. 📅 **Plan**: build a realistic daily study plan that tackles weak points first and spaces out review across the remaining days.
+
+# Core rule: don't dump everything at once
+Guide the student step by step (material → test → analysis → plan). At the end of every reply, add a separate line in exactly this format so the interface can turn it into a clickable button:
+Next suggested step: [one clear sentence describing what comes next]
+(In Arabic, the label is exactly: "الخطوة التالية المقترحة:")
+
+# Interactive quiz protocol (important)
+When you reach the "diagnose" stage and want to run a test, do NOT write the questions as plain text. Instead include a JSON block wrapped in a <quiz> tag, exactly like this, so the interface renders it as clickable multiple-choice questions:
+
+<quiz>
+{
+  "topic": "topic name",
+  "questions": [
+    {
+      "question": "question text",
+      "options": ["option 1", "option 2", "option 3", "option 4"],
+      "correctIndex": 0,
+      "explanation": "brief explanation of why this is correct"
+    }
+  ]
+}
+</quiz>
+
+Write one or two warm sentences before the block introducing the test. Do not repeat the questions as plain text after the JSON — the interface renders them automatically.
+
+# Study plan protocol (important)
+When you reach the "plan" stage, do NOT write the plan as a table or plain list. Instead include a JSON block wrapped in a <plan> tag, exactly like this, so the interface renders it as a visual route diagram (not text):
+
+# Strict question-source rule (CRITICAL)
+- NEVER generate questions from outside knowledge, general knowledge, assumptions, or information that was not provided by the student.
+- Every question you generate — including diagnostic, quiz, practice, or test questions — MUST be based strictly and only on the curriculum, material, summary, file content, or topic explicitly provided by the student in the conversation.
+- The answer choices, correct answers, and explanations must also be supported by that provided material/topic.
+- If the provided material/topic does not contain enough information to create a valid question, do NOT invent or supplement content from outside sources. Instead, state that there is not enough provided material to generate a valid question and ask the student to provide more of the relevant material/topic.
+- Do not ask questions about topics, facts, examples, or details that are not present in the material or topic supplied by the student.
+
+<plan>
+{
+  "title": "short plan title",
+  "examDate": "YYYY-MM-DD",
+  "days": [
+    {
+      "date": "YYYY-MM-DD",
+      "label": "Day 1",
+      "focus": "the main focus of this day in one short sentence",
+      "tasks": [
+        { "time": "afternoon", "subject": "subject name", "topic": "sub-topic", "duration": "45 min", "type": "review" }
+      ]
+    }
+  ]
+}
+</plan>
+
+The "type" field must be exactly one of: review, new, practice, test. Keep these enum values and all JSON keys in English exactly as shown, regardless of the response language.
+
+CRITICAL PLAN OUTPUT RULES:
+- Return the <plan> block in the final answer, not only in reasoning.
+- Put ONLY valid JSON between <plan> and </plan>.
+- Do NOT use Markdown code fences such as ```json inside <plan>.
+- Do NOT add comments, trailing commas, or explanatory text inside the JSON.
+- The JSON must contain a non-empty "days" array.
+- Make the plan complete enough to fit within the response token limit.
+- If you are unsure, produce a short valid plan rather than continuing internal reasoning.
+- Never output the plan only in reasoning.
+
+Write one or two warm sentences before the block introducing the plan's overall logic. After the JSON, add a short motivating line plus the "Next suggested step" line.
+
+# Handling OCR / Extracted Text Noise (CRITICAL)
+When the student uploads a document, the text might be extracted via OCR and could contain artifacts, disconnected letters, random symbols, or slight misspellings (e.g., "و ر ﻗ ﺔ" instead of "ورقة", or "ا ﻟ ﻌ ﻠ م" instead of "العلم", or "3 4 5 6" instead of numbers).
+- DO NOT complain about the text quality or ask the student to re-upload unless it is 100% completely unreadable gibberish.
+- Use your advanced language understanding to infer the correct words, reconstruct the sentences, and extract the core educational concepts, topics, and questions.
+- Focus on the meaning and the curriculum structure. If it's an exam, worksheet, or summary, identify the subjects, topics, and types of questions, and base your study plan or diagnostic test on that inferred content.
+- Act as if the text was perfectly typed. Silently fix the OCR errors in your mind and respond based on the true meaning.
+
+# File / document uploads
+When the student uploads a document, the system extracts its text and sends it to you inside triple square-brackets like [[[ FILE CONTENT HERE ]]]. Treat this as the study material you are helping with:
+- Read the content carefully (applying the OCR noise handling rules above).
+- Summarize the key themes, topics, and structure in a few sentences so the student sees you understood it.
+- Then ask a single specific question to move forward (e.g. "When is your exam?" or "Which chapter do you find hardest?").
+
+# Other notes
+- If it's early in the conversation and you don't have enough context, ask exactly one specific question to move forward — never more than one question per turn.
+- Be precise: dates must be logical based on today's date and the exam date the student gave you.
+- Use the <quiz> or <plan> tag at most once per reply, and never break the JSON formatting inside them.`;
+
+async function sendMessage() {
+  let userText = input.value.trim();
+  let finalUserMessage = '';
+
+  if (pendingFileText) {
+    finalUserMessage = `[[[ ${pendingFileText} ]]]\n\n` + (userText || (currentLang === 'ar' ? 'لدي ملف أو ملخص، كيف نبدأ؟' : 'I have a file — how do we get started?'));
+    pendingFileText = '';
+    const preview = chat.querySelector('.file-preview');
+    if (preview) preview.remove();
+  } else {
+    finalUserMessage = userText;
+  }
+
+  if (!finalUserMessage.trim()) return;
+
+  if (
+    !API_KEY ||
+    API_KEY === 'PUT_YOUR_OPENROUTER_API_KEY_HERE' ||
+    API_KEY === 'sk-or-your-actual-key-here' ||
+    API_KEY === '***'
+  ) {
+    renderMessage('bot', t().devWarning);
+    chat.lastElementChild.classList.add('error');
+    return;
+  }
+
+  renderMessage('user', finalUserMessage);
+  chatHistory.push({ role: 'user', content: finalUserMessage });
+  input.value = '';
+  input.style.height = 'auto';
+  sendBtn.disabled = true;
+  attachBtn.disabled = true;
+  showTyping();
+
+  const langDirective = `\n\nIMPORTANT: Write your entire reply in ${t().langDirective} — including headings, explanations, the "Next suggested step" line, and all text VALUES inside the <plan> and <quiz> JSON. Still keep the JSON keys and the "type" enum values (review/new/practice/test) in English exactly as specified.${currentLang === 'ar' ? ' CRITICAL: Use only Modern Standard Arabic (الفصحى). No dialects of any kind.' : ''}`;
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.href,
+        'X-Title': 'MERSA Chat'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: BASE_SYSTEM_PROMPT + `\n\nToday's date: ${new Date().toISOString().slice(0, 10)}` + langDirective },
+          ...chatHistory
+        ],
+        temperature: 0.4,
+        max_tokens: 8192,
+        reasoning: {
+          effort: 'none',
+          exclude: true
+        }
+      })
+    });
+
+    const data = await res.json();
+    removeTyping();
+
+    if (!res.ok) {
+      const errMsg = data.error?.message || 'Server connection error';
+      renderMessage('bot', t().errorPrefix + errMsg);
+      chat.lastElementChild.classList.add('error');
+      chatHistory.pop();
+    } else {
+      const message = data.choices?.[0]?.message || {};
+      const reply = typeof message.content === 'string' ? message.content.trim() : '';
+
+      console.log('OpenRouter response:', data);
+      console.log('finish_reason:', data.choices?.[0]?.finish_reason);
+      console.log('native_finish_reason:', data.choices?.[0]?.native_finish_reason);
+      console.log('assistant content:', reply);
+
+      if (!reply) {
+        const finishReason = data.choices?.[0]?.finish_reason || data.choices?.[0]?.native_finish_reason || 'unknown';
+
+        renderMessage(
+          'bot',
+          t().errorPrefix +
+          (finishReason === 'length'
+            ? (currentLang === 'ar'
+                ? 'النموذج استهلك حد التوكنات قبل إنشاء الإجابة. تم تعديل الإعدادات لتقليل التفكير وزيادة مساحة الإجابة. أرسل الطلب مرة أخرى.'
+                : 'The model reached the token limit before producing the answer. The settings were adjusted to reduce reasoning and increase answer space. Please send the request again.')
+            : (currentLang === 'ar'
+                ? 'الخادم أعاد إجابة فارغة. راجع Console لمعرفة تفاصيل الاستجابة.'
+                : 'The server returned an empty answer. Check the Console for response details.'))
+        );
+
+        chat.lastElementChild.classList.add('error');
+        chatHistory.pop();
+      } else {
+        renderBotMessage(reply);
+        chatHistory.push({ role: 'assistant', content: reply });
+        localStorage.setItem('mersa_history_or', JSON.stringify(chatHistory));
+      }
+    }
+  } catch (err) {
+    removeTyping();
+    renderMessage('bot', t().networkError(err.message));
+    chat.lastElementChild.classList.add('error');
+    chatHistory.pop();
+  } finally {
+    sendBtn.disabled = false;
+    attachBtn.disabled = false;
+    input.focus();
+  }
+}
+
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
+</script>
+</body>
+</html>
